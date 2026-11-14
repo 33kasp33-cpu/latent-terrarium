@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--
+  Latent Terrarium v1.0 (English Edition)
+  Copyright (c) 2026 Project GHOST-EDGE / Latent Terrarium Contributors
+  Licensed under the MIT License.
+  Zero external telemetry or generative AI APIs are used; everything runs locally in your browser.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Terrarium">
+<meta name="description" content="No external servers. No generative AI. A quiet pocket aquarium where five lives drift and settle their relationships inside your browser.">
+<meta property="og:title" content="Latent Terrarium">
+<meta property="og:description" content="No external servers, no generative AI. A tiny pocket aquarium where five lives drift and slowly settle inside your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://33kasp33-cpu.github.io/latent-terrarium/en/">
+<meta property="og:image" content="https://33kasp33-cpu.github.io/latent-terrarium/en/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Latent Terrarium">
+<meta name="twitter:description" content="A quiet pocket aquarium where five lives drift and settle inside your browser (no external AI, 100% local).">
+<meta name="twitter:image" content="https://33kasp33-cpu.github.io/latent-terrarium/en/ogp.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ja" href="https://33kasp33-cpu.github.io/latent-terrarium/">
+<link rel="alternate" hreflang="en" href="https://33kasp33-cpu.github.io/latent-terrarium/en/">
+<link rel="stylesheet" href="../terrarium.css">
+<title>Latent Terrarium v1.0</title>
+</head>
+<body>
+<main>
+  <header>
+    <div class="title-wrap">
+      <h1>Latent Terrarium<small>v1.0</small></h1>
+      <span class="lit-badge" id="litBadge" title="Current underwater light">Night</span>
+    </div>
+    <div class="links">
+      <span id="bSnd" role="button" tabindex="0" title="Toggle water ambience &amp; chimes">Sound: Off</span>
+      <span id="bLit" role="button" tabindex="0" title="Cycle underwater lighting">Light: Auto</span>
+      <span id="bX" role="button" tabindex="0">Riverbed</span>
+      <a href="../" title="Japanese version">日本語</a>
+    </div>
+  </header>
+  <div class="inapp-note hidden" id="inappNote">
+    <span>In-app browsers may clear local storage. To keep your terrarium long-term, choose "Open in Safari / Chrome" (you can also export &amp; transfer saves under Riverbed).</span>
+    <button type="button" id="bInappClose" aria-label="Close">×</button>
+  </div>
+  <div class="terrarium">
+    <canvas id="cv" title="Touch the water to drop a luminous mote (press &amp; hold for a warm mote)"></canvas>
+    <div class="drop-bar" id="dropBar">
+      <div class="drop-pills" role="group" aria-label="Drop types">
+        <button type="button" class="pill active" data-drop="topic" id="dTopic" title="Drop a topic mote to stir conversation"><i>●</i>Spark <span>topic</span></button>
+        <button type="button" class="pill" data-drop="warm" id="dWarm" title="Drop a warm mote to gently ease tension (or press &amp; hold)"><i>●</i>Warm <span>ease</span></button>
+        <button type="button" class="pill" data-drop="clear" id="dClear" title="Drop a clear mote to soothe fatigue"><i>●</i>Clear <span>calm</span></button>
+      </div>
+      <div class="tank-status" id="tankStatus">Day 1 · Night</div>
+    </div>
+    <div class="feed" id="feed"></div>
+  </div>
+  <div class="xray hidden" id="xray">
+    <div id="rows"></div>
+    <div class="grid" id="grid"></div>
+    <div id="mems"></div>
+    <div id="echoes"></div>
+    <div id="meta"></div>
+    <div class="tools">
+      <button id="bExp" class="hidden">Export Save</button>
+      <button id="bImp">Import Save</button>
+      <button id="bRst" class="warn">Drain &amp; Renew Water</button>
+      <button id="bD1" class="hidden">+3 Hours</button>
+      <button id="bD2" class="hidden">+1 Day</button>
+      <input type="file" id="fImp" accept="application/json,.json,.txt" class="hidden">
+    </div>
+  </div>
+</main>
+<script src="../lang-en.js"></script>
+<script src="../terrarium.js"></script>
+</body>
+</html>

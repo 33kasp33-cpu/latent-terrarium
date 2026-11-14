@@ -1,5 +1,17 @@
-const CACHE_NAME = 'latent-terrarium-v1.0';
-const CORE_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'latent-terrarium-v1.1';
+const CORE_ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './terrarium.css',
+  './terrarium.js',
+  './lang-ja.js',
+  './lang-en.js',
+  './icon.svg',
+  './en/',
+  './en/index.html',
+  './en/manifest.json'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,6 +39,12 @@ self.addEventListener('fetch', (event) => {
         }
         return res;
       })
-      .catch(() => caches.match(event.request).then((hit) => hit || caches.match('./index.html')))
+      .catch(() =>
+        caches.match(event.request).then((hit) => {
+          if (hit) return hit;
+          const isEn = /\/en(\/|$)/.test(new URL(event.request.url).pathname);
+          return caches.match(isEn ? './en/index.html' : './index.html');
+        })
+      )
   );
 });
