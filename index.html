@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<!--
+  Latent Terrarium v1.0
+  Copyright (c) 2026 Project GHOST-EDGE / Latent Terrarium Contributors
+  Licensed under the MIT License:
+  コードの閲覧・改変・再配布は自由です（著作権表示と本許諾表示を残してください）。
+  無保証（AS IS）で提供されます。外部通信・生成AI APIは一切使用しません。
+-->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Terrarium">
+<meta name="description" content="外部通信や生成AIを一切使わず、ブラウザの中だけで5人の関係性がゆっくり沈殿していく、小さな言葉のアクアリウム。">
+<meta property="og:title" content="Latent Terrarium">
+<meta property="og:description" content="外部通信・生成AIなし。ブラウザの中だけで5人の関係性がゆっくり沈殿していく、小さな「言葉のアクアリウム」。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://33kasp33-cpu.github.io/latent-terrarium/">
+<meta property="og:image" content="https://33kasp33-cpu.github.io/latent-terrarium/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Latent Terrarium">
+<meta name="twitter:description" content="5人の関係性がゆっくり沈殿していく、小さな「言葉のアクアリウム」（外部通信・AIなし／ブラウザ完結）。">
+<meta name="twitter:image" content="https://33kasp33-cpu.github.io/latent-terrarium/ogp.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>Latent Terrarium v1.0</title>
+<style>
+:root{--bg:#101114;--panel:#181a20;--text:#dce0e8;--sub:#8089a0;--edge:#282c37;--btn:#20232b;--glass:rgba(255,255,255,.055);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef0f4;--panel:#fff;--text:#20242c;--sub:#6a7185;--edge:#d5d9e2;--btn:#e6e9f0;--glass:rgba(255,255,255,.7);color-scheme:light}}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans",sans-serif;padding:16px;display:flex;flex-direction:column;align-items:center;user-select:none;transition:background-color .6s ease,color .4s ease}
+main{width:min(100%,680px)}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin:4px 2px 10px}
+.title-wrap{display:flex;align-items:baseline;gap:8px}
+h1{font-size:14px;font-weight:600;margin:0;letter-spacing:.04em}
+h1 small{color:var(--sub);font-weight:400;margin-left:8px}
+.lit-badge{font-size:10px;color:var(--sub);border:1px solid var(--edge);background:var(--panel);padding:1px 7px;border-radius:999px;letter-spacing:.04em}
+.links{display:flex;gap:12px;font-size:11px;color:var(--sub);flex-wrap:wrap}
+.links span{cursor:pointer;opacity:.78;transition:opacity .2s,color .2s}
+.links span:hover,.links span:focus-visible{opacity:1;text-decoration:underline;outline:none}
+.links span.on{color:var(--text);opacity:1}
+.terrarium{position:relative;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:12px;box-shadow:0 14px 40px rgba(0,0,0,.28),inset 0 1px 0 var(--glass);overflow:hidden;transition:background-color .6s ease,border-color .5s ease,box-shadow .6s ease}
+canvas{display:block;width:100%;height:380px;cursor:crosshair;touch-action:manipulation;border-radius:8px}
+@media (max-width:520px){canvas{height:330px}}
+.drop-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 4px 6px;border-top:1px solid var(--edge);margin-top:4px}
+.drop-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:5px;background:transparent;color:var(--sub);border:1px solid var(--edge);border-radius:999px;padding:3px 9px;font-size:10.5px;cursor:pointer;transition:background-color .25s,border-color .25s,color .25s,transform .15s}
+.pill:hover{color:var(--text);border-color:color-mix(in srgb,var(--sub) 55%,var(--edge))}
+.pill:active{transform:scale(.96)}
+.pill i{display:inline-block;width:6px;height:6px;border-radius:50%;font-style:normal;background:var(--dc)}
+.pill span{opacity:.72;font-size:9.5px}
+.pill[data-drop="topic"]{--dc:#dce0e8}
+.pill[data-drop="warm"]{--dc:#e5a27a}
+.pill[data-drop="clear"]{--dc:#7bc6e8}
+@media (prefers-color-scheme:light){.pill[data-drop="topic"]{--dc:#546482}}
+.pill.active{color:var(--text);border-color:color-mix(in srgb,var(--dc) 65%,var(--edge));background:color-mix(in srgb,var(--dc) 13%,transparent)}
+.tank-status{font-size:10px;color:var(--sub);letter-spacing:.03em;opacity:.85}
+.feed{min-height:155px;display:flex;flex-direction:column;gap:6px;padding:8px 4px 2px;border-top:1px solid var(--edge);transition:opacity .6s}
+.b{font-size:13px;line-height:1.55;padding:6px 11px;border-radius:9px;max-width:84%;align-self:flex-start;border-left:2px solid var(--c);background:rgba(128,137,160,.11);background:color-mix(in srgb,var(--c) 13%,transparent);opacity:0;transform:translateY(6px) scale(.985);transition:opacity .5s cubic-bezier(.2,.8,.2,1),transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s}
+.b.r{align-self:flex-end;border-left:0;border-right:2px solid var(--c);text-align:right}
+.b.show{opacity:1;transform:none}
+.b.latest{box-shadow:0 3px 14px rgba(0,0,0,.16),0 0 12px color-mix(in srgb,var(--c) 14%,transparent)}
+.b b{font-size:10px;color:var(--c);margin-right:7px;letter-spacing:.05em}
+.b b::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:1.5px;opacity:.9}
+.b.r b{margin:0 0 0 7px;float:right}
+.b .b2{display:block;clear:both;margin-top:2px;opacity:0;transition:opacity .7s}
+.b .b2.show{opacity:1}
+.epitaph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:140px;text-align:center;color:var(--sub);font-size:12px;opacity:0;transition:opacity .8s}
+.epitaph.show{opacity:1}
+.epitaph-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.epitaph-btns button{background:var(--btn);color:var(--text);border:1px solid var(--edge);padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;transition:filter .2s}
+.epitaph-btns button:hover{filter:brightness(1.15)}
+.xray{margin-top:10px;padding:12px;border:1px dashed var(--edge);border-radius:8px;font:11px/1.6 monospace;color:var(--sub);background:color-mix(in srgb,var(--panel) 65%,transparent)}
+.inapp-note{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--edge);background:var(--panel);color:var(--sub);font-size:10.5px;line-height:1.5}
+.inapp-note button{background:none;border:0;color:var(--sub);font-size:13px;line-height:1;padding:2px 5px;cursor:pointer;opacity:.75}
+.inapp-note button:hover{opacity:1;color:var(--text)}
+.hidden{display:none!important}
+.row{display:grid;grid-template-columns:44px 1fr 155px;align-items:center;gap:8px}
+.row i{font-style:normal;color:var(--c)}
+.row span{text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:3px;background:var(--edge);border-radius:2px;overflow:hidden}
+.bar div{height:100%;background:var(--c);width:0;transition:width .25s ease}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin:10px 0 6px;text-align:center}
+.grid span{padding:2px 0;border-radius:3px;font-size:10px;border:1px solid transparent}
+.grid span.bound{border-color:rgba(212,140,112,.45)}
+.grid span.rut{text-decoration:underline dotted}
+#mems{margin:6px 0;white-space:pre-line}
+#echoes{margin:8px 0 6px;padding-top:8px;border-top:1px dashed var(--edge)}
+.echo-title{font-size:10px;opacity:.82;margin-bottom:4px}
+.echo-item{font-size:10.5px;line-height:1.5;margin-bottom:4px;padding-left:7px;border-left:2px solid var(--edge)}
+.echo-time{opacity:.6;margin-right:6px}
+.echo-sp{font-weight:600;margin-right:4px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--edge)}
+.tools button{background:var(--btn);color:var(--text);border:1px solid var(--edge);padding:5px 9px;border-radius:5px;font-size:10px;cursor:pointer}
+.tools button:hover{filter:brightness(1.12)}
+.tools button.warn{color:#d48c70}
+@media (prefers-reduced-motion:reduce){.b,.b .b2,.epitaph,.feed,.bar div,.pill,body,.terrarium{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="title-wrap">
+      <h1>Latent Terrarium<small>v1.0</small></h1>
+      <span class="lit-badge" id="litBadge" title="現在の水中の光">宵闇</span>
+    </div>
+    <div class="links">
+      <span id="bSnd" role="button" tabindex="0" title="水音と共鳴音の切り替え">音: 消</span>
+      <span id="bLit" role="button" tabindex="0" title="照明モードの切り替え">光: 自然</span>
+      <span id="bX" role="button" tabindex="0">川底を見る</span>
+    </div>
+  </header>
+  <div class="inapp-note hidden" id="inappNote">
+    <span>アプリ内ブラウザでは記録が消えやすいため、長く育てる場合は「Safari / Chromeで開く」がおすすめです（川底から記録の書き出し・引き継ぎもできます）</span>
+    <button type="button" id="bInappClose" aria-label="閉じる">×</button>
+  </div>
+  <div class="terrarium">
+    <canvas id="cv" title="水面に触れると、小さな粒が落ちてしばらく漂います（長押しで温かな粒）"></canvas>
+    <div class="drop-bar" id="dropBar">
+      <div class="drop-pills" role="group" aria-label="雫の種類">
+        <button type="button" class="pill active" data-drop="topic" id="dTopic" title="話題の粒を落とす"><i>●</i>光 <span>話題</span></button>
+        <button type="button" class="pill" data-drop="warm" id="dWarm" title="和らぎの粒を落とす（長押しでも可）"><i>●</i>温 <span>和らぎ</span></button>
+        <button type="button" class="pill" data-drop="clear" id="dClear" title="癒やしの粒を落とす"><i>●</i>澄 <span>癒やし</span></button>
+      </div>
+      <div class="tank-status" id="tankStatus">1日目 · 静か</div>
+    </div>
+    <div class="feed" id="feed"></div>
+  </div>
+  <div class="xray hidden" id="xray">
+    <div id="rows"></div>
+    <div class="grid" id="grid"></div>
+    <div id="mems"></div>
+    <div id="echoes"></div>
+    <div id="meta"></div>
+    <div class="tools">
+      <button id="bExp" class="hidden">記録を書き出す</button>
+      <button id="bImp">記録を読み込む</button>
+      <button id="bRst" class="warn">水を入れ替える</button>
+      <button id="bD1" class="hidden">+3時間</button>
+      <button id="bD2" class="hidden">+1日</button>
+      <input type="file" id="fImp" accept="application/json,.json,.txt" class="hidden">
+    </div>
+  </div>
+</main>
+<script>
+/* =====================================================================
+ Latent Terrarium v1.0
+ - 渦（数秒）  : セリフ。川底と水流の結果として漏れ出るだけ
+ - 水流（数分）: aff（今の空気）、各自の水位 lv（調子・眠気・疲れ）
+ - 川底（数日）: bed（関係の地形）、rut（慣れ・腐れ縁の溝）、mem（片方だけが覚えている因縁）
+ - 遺骨（終端）: 水を抜く儀式でのみ落ちる、数値を含まない物語用の記憶＋復元用の地層
+ 記録はこのブラウザの中にだけ残り、どこにも送信しません
+===================================================================== */
+const KEY='latent_terrarium',DBN='latent_terrarium_db',SND_KEY='latent_terrarium_snd',LIT_KEY='latent_terrarium_lit';
+const SCHEMA=6,N=5,DAY=86400,MS_DAY=DAY*1000,$=id=>document.getElementById(id);
+const TAU_AFF=600,TAU_BED=3*DAY,TAU_RUT=7*DAY,TAU_FAT=480;
+const DEBUG=/[?&]debug=1/.test(location.search);
+const rnd=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),pick=a=>a[Math.random()*a.length|0];
+const cv=$('cv'),ctx=cv.getContext('2d'),feed=$('feed');
+let dpr=Math.min(2,devicePixelRatio||1),W=640,H=380,ret=null,hist=[],sub='#8089a0',isLight=false,busy=0,lastSp=-1,lastTrouble=-1;
+let drops=[],bubbles=[],motes=[],echoes=[],born=Date.now(),total=0,reborn=0,noSave=false,draining=false,drainAt=0,loading=false,tids=[];
+let dropKind='topic',litMode='auto',hoverX=-1,hoverY=-1,hoverChar=-1,holdTid=0,holdTriggered=false,lastBondSnd=0;
+const dead=[0,0,0,0,0],fade=[1,1,1,1,1];
+
+function later(fn,ms){const id=setTimeout(()=>{tids=tids.filter(x=>x!==id);fn()},ms);tids.push(id);return id}
+function clearTimers(){tids.forEach(clearTimeout);tids=[]}
+
+const TOP=["冷めたお茶","窓際の席","借りっぱなしの傘","昨日の続き","止まった時計","余った角砂糖","あの橋","割れた箱","底の石","裏の階段","空のコップ","合鍵"];
+const CH=[10,16,8,23,21],TIDE=[5,3.5,6,4,7],KEEP=[2*DAY,5*DAY,.4*DAY,6*DAY,1.5*DAY];
+
+const E=[['ミオ','#6b9ac4'],['ナギ','#d48c70'],['あかり','#7fb27a'],['クロ','#a98ad0'],['ほたる','#c9b45a']]
+  .map(([n,c],i)=>({n,c,t:rnd(10,65),period:rnd(13,34),x:0,y:0,vx:0,vy:0,speak:0,w:TOP[i],ph:rnd(0,6.28),ph2:rnd(0,6.28),fat:0,lv:.6,mem:[]}));
+
+const P=[],PR=Array.from({length:N},()=>[]);
+for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const b=rnd(-.45,.55),p={i,j,aff:b,bed:b,rut:rnd(.04,.18),count:0,pulse:0,flash:0,bound:b>.3};P.push(p);PR[i][j]=PR[j][i]=p}
+
+// ===== Web Audio 水音・共鳴音エンジン（外部音源不要・非表示時は完全停止） =====
+const Sound=(()=>{
+  const ROOTS=[587.33,392.00,659.25,329.63,783.99];
+  let enabled=false,ctxA=null,master=null,ambFilter=null,ambGain=null;
+  try{enabled=localStorage.getItem(SND_KEY)==='1'}catch(e){}
+
+  function updateBtn(){
+    const b=$('bSnd');
+    if(!b)return;
+    b.textContent=enabled?'音: 入':'音: 消';
+    b.classList.toggle('on',enabled);
+  }
+
+  function init(){
+    if(ctxA)return true;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return false;
+    try{
+      ctxA=new AC();
+      master=ctxA.createGain();
+      master.gain.value=enabled&&!draining?.85:.0001;
+      master.connect(ctxA.destination);
+
+      // 柔らかい水中ノイズの生成
+      const len=ctxA.sampleRate*4,buf=ctxA.createBuffer(1,len,ctxA.sampleRate),ch=buf.getChannelData(0);
+      let lastOut=0;
+      for(let i=0;i<len;i++){
+        const white=Math.random()*2-1;
+        lastOut=(lastOut+.02*white)/1.02;
+        ch[i]=lastOut*2.4;
+      }
+      const src=ctxA.createBufferSource();src.buffer=buf;src.loop=true;
+      ambFilter=ctxA.createBiquadFilter();ambFilter.type='lowpass';ambFilter.frequency.value=210;ambFilter.Q.value=.8;
+      const lfo=ctxA.createOscillator(),lfoG=ctxA.createGain();
+      lfo.frequency.value=.07;lfoG.gain.value=85;
+      lfo.connect(lfoG);lfoG.connect(ambFilter.frequency);lfo.start();
+
+      ambGain=ctxA.createGain();ambGain.gain.value=.045;
+      src.connect(ambFilter);ambFilter.connect(ambGain);ambGain.connect(master);src.start();
+
+      // 低い倍音パッド
+      const padF=ctxA.createBiquadFilter();padF.type='lowpass';padF.frequency.value=380;
+      const padG=ctxA.createGain();padG.gain.value=.014;
+      padF.connect(padG);padG.connect(master);
+      [110,165].forEach((f,idx)=>{
+        const o=ctxA.createOscillator();o.type='sine';o.frequency.value=f;
+        const g=ctxA.createGain();g.gain.value=idx===0?1:.55;
+        o.connect(g);g.connect(padF);o.start();
+      });
+      return true;
+    }catch(e){ctxA=null;return false}
+  }
+
+  function setEnabled(on){
+    enabled=!!on;
+    try{localStorage.setItem(SND_KEY,enabled?'1':'0')}catch(e){}
+    updateBtn();
+    if(enabled){
+      if(init()&&ctxA){
+        if(ctxA.state==='suspended')ctxA.resume().catch(()=>{});
+        if(master&&!draining)master.gain.setTargetAtTime(.85,ctxA.currentTime,.08);
+      }
+    }else if(ctxA){
+      if(master)master.gain.setTargetAtTime(.0001,ctxA.currentTime,.06);
+      setTimeout(()=>{if(!enabled&&ctxA&&ctxA.state==='running')ctxA.suspend().catch(()=>{})},160);
+    }
+  }
+
+  function unlock(){
+    if(!enabled)return;
+    if(!ctxA)init();
+    if(ctxA&&ctxA.state==='suspended'&&!draining&&document.visibilityState!=='hidden'){
+      ctxA.resume().catch(()=>{});
+    }
+  }
+
+  function onVisibility(visible){
+    if(!ctxA)return;
+    if(!visible){
+      if(ctxA.state==='running')ctxA.suspend().catch(()=>{});
+    }else if(enabled&&!draining&&ctxA.state==='suspended'){
+      ctxA.resume().catch(()=>{});
+    }
+  }
+
+  function connectPan(node,xNorm){
+    if(typeof ctxA.createStereoPanner==='function'){
+      const p=ctxA.createStereoPanner();
+      p.pan.value=clamp(xNorm,-.85,.85);
+      node.connect(p);p.connect(master);
+    }else{
+      node.connect(master);
+    }
+  }
+
+  function bloop(delay,gainVal,fStart,fEnd,dur,xNorm,cutoff){
+    const t0=ctxA.currentTime+delay;
+    const o=ctxA.createOscillator(),f=ctxA.createBiquadFilter(),g=ctxA.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(fStart,t0);
+    o.frequency.exponentialRampToValueAtTime(fEnd,t0+dur);
+    f.type='lowpass';f.frequency.value=cutoff;
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.linearRampToValueAtTime(gainVal,t0+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+dur+.12);
+    o.connect(f);f.connect(g);connectPan(g,xNorm);
+    o.start(t0);o.stop(t0+dur+.15);
+  }
+
+  function playDrop(xNorm,yNorm,kind){
+    if(!enabled||!ctxA||ctxA.state!=='running')return;
+    const ym=1+(.5-clamp(yNorm,0,1))*.14;
+    if(kind==='warm'){
+      bloop(0,.09,290*ym,640*ym,.11,xNorm,1450);
+      bloop(.18,.032,330*ym,720*ym,.10,xNorm,1250);
+    }else if(kind==='clear'){
+      bloop(0,.082,540*ym,1280*ym,.085,xNorm,2800);
+      bloop(.18,.028,620*ym,1420*ym,.08,xNorm,2500);
+    }else{
+      bloop(0,.085,380*ym,920*ym,.095,xNorm,2100);
+      bloop(.18,.03,440*ym,1040*ym,.09,xNorm,1850);
+    }
+  }
+
+  function playVoice(charIdx,mood,isReply){
+    if(!enabled||!ctxA||ctxA.state!=='running')return;
+    const root=ROOTS[charIdx]||523.25,t0=ctxA.currentTime;
+    const xNorm=W>0?(E[charIdx].x/W)*1.2-.6:(isReply?.25:-.25);
+    const f=ctxA.createBiquadFilter(),g=ctxA.createGain();
+    f.type='lowpass';f.frequency.value=mood==='e'?950:mood==='c'?2400:1750;
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.linearRampToValueAtTime(.045,t0+.015);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+.65);
+    f.connect(g);connectPan(g,xNorm);
+
+    const o1=ctxA.createOscillator();o1.type='sine';o1.frequency.value=root;
+    o1.connect(f);o1.start(t0);o1.stop(t0+.7);
+
+    const o2=ctxA.createOscillator(),g2=ctxA.createGain();
+    o2.type='triangle';
+    o2.frequency.value=mood==='c'?root*2:mood==='e'?root:root*1.5;
+    g2.gain.value=mood==='w'?.38:mood==='c'?.24:.18;
+    o2.connect(g2);g2.connect(f);o2.start(t0);o2.stop(t0+.7);
+  }
+
+  function playBond(){
+    if(!enabled||!ctxA||ctxA.state!=='running')return;
+    const nowMs=Date.now();
+    if(nowMs-lastBondSnd<1200)return;
+    lastBondSnd=nowMs;
+    [523.25,783.99].forEach((freq,idx)=>{
+      const t0=ctxA.currentTime+idx*.14;
+      const o=ctxA.createOscillator(),g=ctxA.createGain();
+      o.type='sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(.0001,t0);
+      g.gain.linearRampToValueAtTime(.036,t0+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+.95);
+      o.connect(g);g.connect(master);
+      o.start(t0);o.stop(t0+1);
+    });
+  }
+
+  function playDrainStart(){
+    if(!enabled||!ctxA)return;
+    const t0=ctxA.currentTime;
+    if(ambFilter){
+      ambFilter.frequency.cancelScheduledValues(t0);
+      ambFilter.frequency.setValueAtTime(ambFilter.frequency.value,t0);
+      ambFilter.frequency.linearRampToValueAtTime(85,t0+10.5);
+    }
+    if(ambGain){
+      ambGain.gain.cancelScheduledValues(t0);
+      ambGain.gain.setValueAtTime(ambGain.gain.value,t0);
+      ambGain.gain.linearRampToValueAtTime(.0001,t0+10.5);
+    }
+  }
+
+  function playFarewell(charIdx){
+    if(!enabled||!ctxA||ctxA.state!=='running')return;
+    const root=ROOTS[charIdx]||523.25,t0=ctxA.currentTime;
+    const f=ctxA.createBiquadFilter(),g=ctxA.createGain();
+    f.type='lowpass';f.frequency.value=1500;
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.linearRampToValueAtTime(.048,t0+.04);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+2.5);
+    f.connect(g);g.connect(master);
+    [1,1.5].forEach((mul,idx)=>{
+      const o=ctxA.createOscillator(),og=ctxA.createGain();
+      o.type='sine';o.frequency.value=root*mul;
+      og.gain.value=idx===0?1:.32;
+      o.connect(og);og.connect(f);o.start(t0);o.stop(t0+2.6);
+    });
+  }
+
+  return{updateBtn,setEnabled,unlock,onVisibility,playDrop,playVoice,playBond,playDrainStart,playFarewell,isEnabled:()=>enabled};
+})();
+
+// ===== 時間帯・照明モード =====
+const LIT_ORDER=['auto','dawn','day','dusk','night'];
+const LIT_NAMES={auto:'自然',dawn:'朝霞',day:'昼光',dusk:'夕凪',night:'宵闇'};
+const PHASE_NAMES={dawn:'朝霞',day:'昼光',dusk:'夕凪',night:'宵闇'};
+const PHASE_PAL={
+  dark:{
+    dawn:{top:'rgba(116,134,178,.15)',bot:'rgba(18,24,38,.25)',ray:'rgba(180,198,240,.085)',surf:'rgba(196,212,248,.34)',mote:'rgba(218,228,250,.55)',sed:'rgba(54,62,82,.32)',caustic:.075,tilt:.18},
+    day:{top:'rgba(128,178,214,.16)',bot:'rgba(18,28,40,.22)',ray:'rgba(186,224,252,.095)',surf:'rgba(198,232,255,.38)',mote:'rgba(220,242,255,.58)',sed:'rgba(58,72,88,.30)',caustic:.09,tilt:.06},
+    dusk:{top:'rgba(198,126,98,.16)',bot:'rgba(26,20,32,.28)',ray:'rgba(236,162,120,.085)',surf:'rgba(244,178,140,.35)',mote:'rgba(248,202,166,.52)',sed:'rgba(74,56,62,.32)',caustic:.07,tilt:-.18},
+    night:{top:'rgba(78,102,148,.12)',bot:'rgba(12,14,22,.34)',ray:'rgba(128,158,216,.055)',surf:'rgba(148,178,232,.25)',mote:'rgba(176,204,248,.42)',sed:'rgba(40,46,62,.34)',caustic:.045,tilt:-.05}
+  },
+  light:{
+    dawn:{top:'rgba(130,156,208,.16)',bot:'rgba(186,200,224,.12)',ray:'rgba(255,255,255,.36)',surf:'rgba(98,124,172,.34)',mote:'rgba(108,128,168,.40)',sed:'rgba(154,166,192,.28)',caustic:.12,tilt:.18},
+    day:{top:'rgba(116,178,224,.15)',bot:'rgba(182,212,234,.10)',ray:'rgba(255,255,255,.42)',surf:'rgba(88,144,194,.36)',mote:'rgba(92,142,184,.38)',sed:'rgba(146,168,188,.25)',caustic:.14,tilt:.06},
+    dusk:{top:'rgba(218,148,114,.18)',bot:'rgba(196,174,178,.14)',ray:'rgba(255,224,196,.34)',surf:'rgba(182,112,86,.36)',mote:'rgba(168,114,96,.40)',sed:'rgba(172,152,148,.28)',caustic:.11,tilt:-.18},
+    night:{top:'rgba(88,112,164,.18)',bot:'rgba(142,156,188,.20)',ray:'rgba(202,218,250,.22)',surf:'rgba(74,96,142,.35)',mote:'rgba(88,108,152,.42)',sed:'rgba(128,140,166,.30)',caustic:.07,tilt:-.05}
+  }
+};
+try{const lm=localStorage.getItem(LIT_KEY);if(LIT_ORDER.includes(lm))litMode=lm}catch(e){}
+function getActivePhase(){
+  if(litMode!=='auto')return litMode;
+  const h=new Date().getHours();
+  if(h>=5&&h<9)return'dawn';
+  if(h>=9&&h<17)return'day';
+  if(h>=17&&h<20)return'dusk';
+  return'night';
+}
+function updateLitUI(){
+  const ph=getActivePhase();
+  $('bLit').textContent='光: '+LIT_NAMES[litMode];
+  $('litBadge').textContent=PHASE_NAMES[ph];
+  updateTankStatus();
+}
+function updateTankStatus(){
+  const days=(Math.max(0,Date.now()-born)/MS_DAY+1)|0;
+  const ph=PHASE_NAMES[getActivePhase()];
+  const drTxt=drops.length?` · 粒×${drops.length}`:'';
+  $('tankStatus').textContent=`${days}日目 · ${ph}${drTxt}`;
+}
+
+// ===== 声 =====
+const V=[
+ {o:{w:["今のところ、ちょうどいい距離だと思う。","{x}、さっきの話の続きだけど。","隣、座ってもいい？"],c:["……何か言うことはないの。","距離を取る理由、聞いてもいい？","そういう態度、わかりやすいわね。"],m:["観測してるだけ。気にしないで。","変化、感じない？ 底のほう。","静かね。悪くないけど。"],e:["……まだそこにいたの。別にいいけど。","その話、前にもしなかった？","お互いに暇ね。否定はしないけど。"]},
+  r:{w:["そうかな。私は少し近いと思う。","……ありがとう。たぶん。","悪くないわね。"],c:["今は答えたくない。","理由は自分で考えて。","……別に、普通よ。"],m:["さあ。どちらでもいいかな。","記録しておくね。","そう見えるなら、そうなんじゃない。"],e:["……それ、本気で言ってるの。","さあね。どうでもいいわ。","はいはい、わかったから。"]},
+  c3:{w:["……なら、もう少しこのままでいましょう。","ふふ、素直じゃないわね。"],c:["……そう。無理には聞かないわ。","勝手にしなさい。"],m:["……まあ、急ぐ話でもないしね。","またあとで確かめましょう。"],e:["……ほんと、腐れ縁ね。","あきれた。私も人のこと言えないけど。"]},
+  tp:["{t}、まだ整理がついてないの。","また{t}のこと考えてたわ。","{t}、そのままにしておくつもり？"],
+  dr:["……何か落ちてきたわね。","あれ、さっきまであった？"],
+  ret:["……ずいぶん長いこと時間が飛んでいた気がするわ。","さっきまでの話、どこまで進んだっけ。"],
+  lo:["……少し、休ませて。","今日はもう、観測おしまい。"],
+  mm:["{x}、{t}のこと、まだ終わってないわよね。","{t}の件、私は覚えてるから。"],
+  mr1:["……その話、また蒸し返すの。","覚えてるわよ。忘れるわけないでしょ。"],
+  mr0:["{t}？ ……何の話だったかしら。","ごめんなさい、記録に残ってないわ。"],
+  mf:["……そう。私だけが覚えてるのね。","いいわ、記録は私が持っておく。"],
+  g:"{y}のことだけど……少し離れてるわね。",tic:"……（見てる）"},
+ {o:{w:["別に、近くにいたかっただけだし。","なんだ、いたのか。","……悪くない風だな。"],c:["……そっち、寒くないか。","何で黙ってんだよ。","睨むなよ、やりにくい。"],m:["暇だな。","なあ、これ意味あんの？","なんか忘れてる気がするんだよな。"],e:["……あー、眠い。今なんの話だっけ。","またお前かよ。飽きないな。","空気みたいにそこにいるな、お前。"]},
+  r:{w:["うるさい。","……まあ、悪くない。","べつに、嫌とは言ってない。"],c:["別に。","話しかけんな。","そっちこそ何だよ。"],m:["知らね。","勝手にしろ。","さあな、考えすぎだろ。"],e:["お前が言うな。","聞いてなかったわ、わりぃ。","……あ？ なんか言ったか。"]},
+  c3:{w:["……なんだよ、笑うなよ。","ま、しばらくここにいるわ。"],c:["……ちっ、かわいくねえな。","じゃあ勝手にしろよ。"],m:["……あーあ、また暇になった。","ま、どうでもいいけどな。"],e:["……じゃあどっか行けよ。行かないだろうけど。","ほんと、お前とは気が抜けるわ。"]},
+  tp:["{t}？ もう終わった話だろ。","また{t}の話かよ。","{t}、誰が片付けるんだあれ。"],
+  dr:["……なんだこれ、誰か落としたか？","ん、なんか沈んでくぞ。"],
+  ret:["……あー、やっと空気が動いたな。","長かったな、さっきの空白。"],
+  lo:["……だる。","今日はもう喋んねえ。"],
+  mm:["{x}、{t}の件、まだ根に持ってるからな。","おい、{t}、結局どうなったんだよ。"],
+  mr1:["しつけえな、まだ言うか。","……あれはお前も悪いだろ。"],
+  mr0:["は？ {t}？ 知らねえよ。","そんなことあったっけ。"],
+  mf:["……忘れてんのかよ。","ちっ、覚えてんの俺だけかよ。"],
+  g:"{y}、なんか変じゃね？",tic:"……ちっ。"},
+ {o:{w:["ね、今日は静かでいいね。","{x}、こっちおいでよ。","なんか近くにいると落ち着くねえ。"],c:["喧嘩じゃないよね？ ね？","遠いなあ、寂しいよ。","怒ってる？ 気のせい？"],m:["ふわーっとしてるねえ。","お茶、飲む？ ないけど。","今、何時くらいなんだろうね。"],e:["んー……お湯、沸かすのもめんどくさいねえ。","なんかもう、どっちでもよくなっちゃった。","また同じところでぐるぐるしてるねえ。"]},
+  r:{w:["えへへ、そうだね。","うん、いっしょだね。","わたしは嬉しいよ。"],c:["そっか……そうなんだね。","うーん、困ったなあ。","むずかしい顔しないでよ。"],m:["そうだねえ。","なんでだろうねえ。","ま、そのうちわかるよ。"],e:["あはは、ひどいなあ。","水でいいんじゃない、もう。","うん、まあ、そんなもんかもね。"]},
+  c3:{w:["えへへ、なんだか眠くなってきちゃった。","このままぼーっとしてよっか。"],c:["……またあとで話しかけるね。","しょんぼりしちゃうなあ。"],m:["あ、風が吹いた気がする。","んー、まあいっか。"],e:["おたがい、ゆるくなったねえ。","あはは、ずっとこのままだったりして。"]},
+  tp:["{t}のこと、まだ気になってるの？","ねえ、{t}ってどうなったんだっけ。","{t}、なんだか懐かしい響きだねえ。"],
+  dr:["あ、なんか光るのが落ちてきたよ。","ねえ見て、ぷかぷかしてる。"],
+  ret:["わあ、いつの間にかずいぶん時間が経ってるね。","ね、さっきまでの秘密の話、続きしよっか。"],
+  lo:["ふあ……ねむい。","んー、ちょっとだけ寝ていい？"],
+  mm:["ねえ{x}、{t}のこと、覚えてる？","{t}ってさ、あのあとどうしたんだっけ。"],
+  mr1:["うん、覚えてるよ。ちょっとだけ。","あはは、それまだ言う？"],
+  mr0:["えー、{t}？ なんだっけ、それ。","ごめん、もう忘れちゃった。"],
+  mf:["そっかあ、忘れちゃったかあ。","……まあ、いっか。"],
+  g:"{y}ね、ちょっと元気ないかも。",tic:"あれ、何の話？"},
+ {o:{w:["仲良しごっこは楽しいか。","珍しく気が合うじゃないか。","たまには隣にいてやってもいい。"],c:["賢明な距離だ。拍手してやる。","まだ拗ねてるのか。","そうやって壁を作っていろ。"],m:["退屈だ。誰か騒げよ。","底の泥が増えたな。誰のせいだ。","今日も代わり映えしないな。"],e:["お前といると、毒を抜かれて調子が狂う。","腐れ縁というのも、存外しぶといものだな。","またその顔か。見飽きたぞ。"]},
+  r:{w:["勘違いするなよ。","……調子が狂う。","ふん、悪くはないがな。"],c:["好きに言え。","お前に何がわかる。","精々そうやって吠えていろ。"],m:["ふん。","つまらん答えだ。","退屈しのぎにはなるか。"],e:["めでたい頭だな。","退屈しのぎにもならん。","……好きにしろ。どうせ離れんだろう。"]},
+  c3:{w:["……誰にも言うなよ、今の。","まったく、お前には敵わん。"],c:["……せいぜい一人で震えていろ。","ふん、話にならんな。"],m:["……やれやれ、静かすぎる。","次はもう少しマシな話をしろ。"],e:["……まったく、毒気が抜けていかん。","お前も大概、暇人だな。"]},
+  tp:["{t}か。全員、見て見ぬふりだったな。","まだ{t}にこだわっているのか。","{t}の件、そろそろ白状したらどうだ。"],
+  dr:["……ほう、外から余計な雫が落ちてきたか。","なんだ、あの光は。餌のつもりか？"],
+  ret:["……ようやく時計の針が動き出したか。","不在の間も、ここは相変わらずだったぞ。"],
+  lo:["……今は静かにしていろ。","眠いわけではない。目を閉じているだけだ。"],
+  mm:["{x}。{t}の件、忘れたとは言わせんぞ。","{t}か。お前はまだ借りを返していない。"],
+  mr1:["執念深いやつだ。","……覚えている。だから何だ。"],
+  mr0:["{t}？ 記憶にないな。","過去に興味はない。"],
+  mf:["……忘れたか。お前らしい。","ふん、覚えているのは俺だけか。"],
+  g:"{y}を庇うやつ、いるか？ いないか。",tic:"……くく。"},
+ {o:{w:["あの……近くて、安心する。","えっと、{x}……あの。","隣にいても、邪魔じゃ、ないかな。"],c:["……あの、ごめん。","いや、何でも……ない。","わたし、何か怒らせた、かな……"],m:["……あれ、さっき、何だっけ。","あの、えっと……","静かすぎて、音が聞こえそう。"],e:["……あ、ううん。ただ、ぼーっとしてただけ。","なんか……いるのが当たり前になってきちゃった。","……眠い、ね。なんでもないけど。"]},
+  r:{w:["……うん。","わたしも、たぶん。","……よかった。"],c:["……ごめん、なさい。","……聞こえなかった、ことに。","……ううん、平気。"],m:["……え？","あ、うん……","そう、かも、しれないね。"],e:["……ふふ、変なの。","うん……どうでも、いいかも。","……また、それ言うんだね。"]},
+  c3:{w:["……えへへ、少しだけ、あったかいね。","……ありがと、ね。"],c:["……あっちに、行ってるね……","……ごめんなさい。"],m:["……あ、ううん、なんでもないの。","……また、あとでね。"],e:["……こういうの、嫌いじゃない、よ。","……ふふ、おかしな二人だね。"]},
+  tp:["あの、{t}……やっぱり、言わないで。","{t}のこと、少しだけ思い出してたの。","まだ、{t}はそこにあるのかな……"],
+  dr:["……あ、小さな光が、落ちてきた……","なんだろう、これ……きれい。"],
+  ret:["……あ、戻ってきた……少し、寂しかったかも。","いない間、ちょっとだけ、ざわざわしてたんだよ。"],
+  lo:["……ん、ちょっと、眠い……","……今は、静かにしてたい。"],
+  mm:["あの……{x}、{t}のこと、まだ、覚えてる……？","{t}……わたし、まだ、気になってて。"],
+  mr1:["……うん、覚えてる。","……あのとき、ごめんね。"],
+  mr0:["……え、{t}……？ ごめん、思い出せない。","……そんなこと、あったっけ。"],
+  mf:["……そっか。わたしだけ、なんだね。","……ううん、いいの。"],
+  g:"{y}……さっきから、遠い、気がする。",tic:"……あ。"}
+];
+const PL={
+ "0-1":[["昨日の件、結論は出たの？","出てない。出す気もない。","……でしょうね。知ってたわ。",-.08],["……また同じ席にいるのね。","お前が来たんだろ。","さあ、どうだったかしら。",-.1]],
+ "0-2":[["あかり、その楽観、根拠はあるの。","ないよ。あったほうがいい？","……ううん、そのままでいいわ。",.1],["お茶、本当に出てこないのね。","出てくるまで待つの、楽しいよ。","……変な子ね、ほんと。",.12]],
+ "0-3":[["クロ、また私を試してるでしょ。","試すほどの価値があればな。","……可愛くない言い方ね。",-.12],["あなたの皮肉、嫌いじゃない。","……やめろ、気持ち悪い。","あら、照れてるの？",-.25]],
+ "0-4":[["ほたる、言いたいことは言って。","……言ったら、変わる？","少なくとも、私は聞くわよ。",.05],["怖がらなくていいから。","……怖いのは、そっちじゃなくて。","……そう。ならいいけれど。",0]],
+ "1-2":[["あかり、あんまりくっつくな。","えー、でも暖かいでしょ。","……暑苦しいわ。",-.15],["さっきの飴、お前だろ。","ちがうよー、ナギがくれたんだよ？","……記憶改ざんすんな。",.1]],
+ "1-3":[["お前の顔見てると腹立つ。","光栄だな。","褒めてねえよ。",-.2],["さっさと言えよ、クロ。","言えば殴るだろ、ナギ。","……殴らねえよ、たぶん。",.05]],
+ "1-4":[["……ほたる、そこ寒いだろ。","……平気。","平気な顔してねえぞ。",.15],["おい、今のは聞こえてたぞ。","ご、ごめ……","……怒ってねえってば。",-.1]],
+ "2-3":[["クロくん、笑ってるの珍しいね。","笑ってない。","えー、口元ゆるんでたよ？",.12],["ねえ、本当は優しいんでしょ。","黙れ。","あはは、照れてる。",.1]],
+ "2-4":[["ほたるちゃん、一緒に寝ない？","……それは、ちょっと……","えー、枕貸してあげるのに。",-.05],["今日のほたる、好きだよ。","……え、あ、……ありがと。","えへへ、どういたしまして。",.15]],
+ "3-4":[["ほたる。お前、案外図太いな。","……そう、見える？","ああ、誰よりもな。",.1],["怯えるのが芸か？","……ちがう、よ。","ならしゃんと立っていろ。",-.12]]
+};
+
+// ===== 最後の言葉（遺書：すべて2拍・地の文なし・モノとやりかけ）=====
+// 優先順位: 1.極浅(total<15) / 2.片覚えの因縁 / 3.共有因縁 / 4.深い溝(rut>=0.42) / 5.深い川底(|bed|>=0.3) / 6.平穏
+const LW=[
+ {s:[["まだ、水も馴染んでいないのに。","……記録するほどでも、ないわね。"],["始まったばかりだったのにね。","……おやすみ。"]],
+  u:[["{t}、結局そのままになったわね。","{x}……もう忘れてるでしょうけど。"],["{t}のこと、最後まで私だけ覚えてたわ。","{x}、おやすみなさい。"]],
+  m:[["{t}、結局ふたりとも答えを出さなかったわね。","{x}、……悪くなかったわ。"],["{t}の記録、ここで閉じるわ。","{x}の分も、一緒に。"]],
+  r:[["{x}、なんだかんだ言って、よく隣にいたわね。","{t}も、そのままにしていくわ。"],["お互いに暇だったのね、{x}。","……こういうの、悪くなかったわ。"]],
+  w:[["{x}のそばは、不思議と息がしやすかったわ。","……おやすみ、{x}。"],["{x}といた時間、悪くなかった。","記録は、ここで終わりにするわね。"]],
+  c:[["{x}とは、ちょうどいい距離のまま終わるわね。","無理に近づかなくて、よかったのかも。"],["{x}。……最後まで、少し遠かったわね。","それも悪くなかったわ。"]],
+  d:[["{t}、まだここにあるのね。","……観測は、ここまでにするわ。"],["静かなまま、終わるのね。","……おやすみなさい。"]]},
+
+ {s:[["……はや。まだ何も始まってねえだろ。","ま、いいけどよ。"],["水、ぬるくなる前におしまいか。","……あーあ。"]],
+  u:[["{t}、返せよな、{x}。","……って、もう聞こえてねえか。"],["おい{x}。{t}の件、覚えてんの俺だけかよ。","……ちっ、勝手なやつ。"]],
+  m:[["{t}の話、{x}とはよくやったな。","……ま、そのままにしとくか。"],["なあ{x}、{t}、結局どうでもよかったのかもな。","……じゃあな。"]],
+  r:[["なんでいつも隣にいたんだろうな、{x}。","……ま、静かになるか。"],["{t}、まだそこにあるぞ、{x}。","……あーあ、お前がいないと暇だな。"]],
+  w:[["……{x}、そっち寒くねえか。","ま、風邪ひくなよ。"],["{x}、お前とは悪くない空気だったな。","……じゃあな。"]],
+  c:[["{x}とは、最後まで噛み合わなかったな。","……ま、そういうのもあるだろ。"],["……{x}、お前とはもう少し離れておくべきだったな。","ま、いいか。"]],
+  d:[["{t}か。……誰が片付けるんだろうな。","ま、知らねえけど。"],["あーあ、静かになるな。","……じゃあな。"]]},
+
+ {s:[["あれ、もうおしまいなの？","……ちょっとはやいねえ。"],["まだ、あったまる前だったのにね。","……またね。"]],
+  u:[["{t}のこと、{x}はもう忘れちゃったかな。","……わたしは、覚えてたよ。"],["ねえ{x}、{t}どうなったんだっけ。","……返事、こないねえ。"]],
+  m:[["{t}ってさ、なんかふたりの合言葉みたいだったね。","{x}、……またね。"],["{t}のこと、{x}も覚えてたんだね。","……えへへ、うれしいな。"]],
+  r:[["お湯、結局いちども沸かさなかったねえ。","……ま、いっか。{x}、いたし。"],["{x}といつも同じところでぐるぐるしてたねえ。","……なんだか、ちょうどよかったなあ。"]],
+  w:[["{x}といると、いつもぽかぽかしてたねえ。","……また、会えるといいな。"],["{x}、最後まで優しかったねえ。","……ありがと。"]],
+  c:[["{x}、わたし少し遠かったかな。","……ごめんね、おやすみ。"],["{x}とは、あんまり近くになれなかったねえ。","……おやすみ。"]],
+  d:[["{t}、ずっとそこにあったねえ。","……そろそろ、おやすみの時間かな。"],["なんだか、いい天気だった気がするよ。","……おやすみ。"]]},
+
+ {s:[["……ほう。何もないまま終わるか。","潔くていいがな。"],["底に泥すら溜まっておらん。","……つまらん幕引きだ。"]],
+  u:[["{t}。……誰も片付けなかったな。","{x}。……返事くらいしろ。"],["{t}の借り、返してもらうつもりだったんだがな。","……{x}、忘れたとは言わせんぞ。"]],
+  m:[["{t}か。……最後まで平行線だったな、{x}。","だが、退屈はしなかった。"],["{t}の件は引き分けにしておいてやる、{x}。","……静かになるな。"]],
+  r:[["……{x}、お前といると毒気が抜けたな。","まったく、しぶとい腐れ縁だった。"],["{t}を眺めて、また{x}と顔を合わせるのも終わりか。","……静かすぎるな。"]],
+  w:[["……{x}、お前には少し調子を狂わされたな。","誰にも言うなよ。"],["{x}。……悪くない退屈しのぎだった。","さらばだ。"]],
+  c:[["……{x}、賢明な距離だったな。","互いに踏み込まずに済んだ。"],["ふん、{x}とは最後まで水と油か。","……せいぜい達者でな。"]],
+  d:[["{t}だけを残して、水は引くか。","……悪くない眺めだった。"],["……全員、消えるか。","静かすぎるな。"]]},
+
+ {s:[["……あ、もう、時間なんだね。","まだ、なんにも話してないのに……。"],["……お水が、ひいていく。","……さよなら、かな。"]],
+  u:[["{t}のこと、……わたしだけ、ずっと覚えてた。","{x}は、忘れてて、いいよ。"],["……{x}、{t}、まだそこにあるよ。","……もう、聞こえないよね。"]],
+  m:[["{t}、……ふたりでずっと、話してたね。","{x}、……ありがと。"],["{t}のこと、消えちゃうのかな。","{x}……また、どこかで。"]],
+  r:[["……{x}がいるのが、当たり前になってた。","いなくなったら、……少し寒いかも。"],["{t}のそばで、{x}とずっとぼーっとしてたね。","……こういうの、嫌いじゃなかったよ。"]],
+  w:[["{x}の隣、……あったかかった。","……また、あえるかな。"],["{x}がいてくれたから、こわくなかったよ。","……おやすみ。"]],
+  c:[["……{x}、遠くから見てるだけで、精一杯だった。","……ごめんね。"],["{x}のこと、ちょっとだけ見てたんだよ。","……さよなら。"]],
+  d:[["……{t}、まだそこにあるね。","……おやすみ。"],["……お水が、静かになるね。","……バイバイ。"]]}
+];
+
+function initMotes(){
+  motes=[];
+  for(let k=0;k<28;k++){
+    motes.push({x:rnd(10,W-10),y:rnd(12,H-16),r:rnd(.8,2.1),z:rnd(.4,1.2),ph:rnd(0,6.28)});
+  }
+}
+function spawnBubbles(x,y,cnt,col){
+  if(draining)return;
+  for(let k=0;k<cnt;k++){
+    if(bubbles.length>=36)bubbles.shift();
+    bubbles.push({x:x+rnd(-8,8),y:y+rnd(-4,4),r:rnd(1.4,3.1),vy:rnd(14,28),ph:rnd(0,6.28),age:0,maxAge:rnd(2.2,4.6),c:col||null});
+  }
+}
+
+function say(i,t,r,mood){
+  if(draining)return;
+  Array.from(feed.children).forEach(el=>el.classList.remove('latest'));
+  const d=document.createElement('div');d.className='b'+(r?' r':'')+' latest';d.style.setProperty('--c',E[i].c);
+  const n=document.createElement('b');n.textContent=E[i].n;d.append(n,t);feed.append(d);
+  requestAnimationFrame(()=>d.classList.add('show'));
+  while(feed.children.length>6)feed.firstChild.remove();
+  Sound.playVoice(i,mood||'m',!!r);
+  spawnBubbles(E[i].x,E[i].y-4,2,E[i].c);
+  later(()=>{if(draining)return;d.classList.remove('show','latest');later(()=>d.remove(),600)},10500);
+}
+function fresh(a){let q,n=0;do q=pick(a);while(hist.includes(q)&&++n<6);hist.push(q);if(hist.length>45)hist.shift();return q}
+
+function pushEcho(entry){
+  echoes.unshift(entry);
+  if(echoes.length>8)echoes.length=8;
+  renderEchoes();
+}
+function renderEchoes(){
+  const box=$('echoes');
+  if(!box)return;
+  if(!echoes.length){box.innerHTML='<div class="echo-title">水底に残る余韻（最近の渦）</div><div>まだ余韻はありません</div>';return}
+  box.innerHTML='<div class="echo-title">水底に残る余韻（最近の渦）</div>';
+  echoes.forEach(ec=>{
+    const item=document.createElement('div');item.className='echo-item';
+    const tm=document.createElement('span');tm.className='echo-time';tm.textContent=ec.time;item.appendChild(tm);
+    ec.lines.forEach((ln,idx)=>{
+      if(idx>0)item.appendChild(document.createTextNode(' ／ '));
+      const sp=document.createElement('span');sp.className='echo-sp';sp.style.color=E[ln.i].c;sp.textContent=E[ln.i].n;
+      item.append(sp,document.createTextNode('「'+ln.text+'」'));
+    });
+    box.appendChild(item);
+  });
+}
+
+function updateLevels(dt){
+  const d=new Date(),hr=d.getHours()+d.getMinutes()/60,ts=Date.now()/1000;
+  E.forEach((e,i)=>{
+    const circ=.5+.5*Math.cos(2*Math.PI*(hr-CH[i])/24),tide=.5+.5*Math.sin(2*Math.PI*ts/(3600*TIDE[i])+e.ph2);
+    e.fat*=Math.exp(-dt/TAU_FAT);e.lv=clamp(.12+.55*circ+.33*tide-e.fat,.05,1);
+  });
+}
+function remember(i,j,w,amt){
+  const M=E[i].mem;let m=M.find(q=>q.j===j&&q.w===w);
+  if(m){m.n++;m.s=Math.min(1,m.s+amt)}else M.push({w,j,n:1,s:amt});
+  M.sort((a,b)=>b.s-a.s);if(M.length>8)M.length=8;
+}
+function recall(i,j,w){const m=E[i].mem.find(q=>q.j===j&&q.w===w);return m?m.s:0}
+function grudge(i,j){return E[i].mem.find(q=>q.j===j&&q.n>=3&&q.s>=.5)}
+function decayMem(dt){E.forEach((e,i)=>{const k=Math.exp(-dt/KEEP[i]);e.mem.forEach(q=>q.s*=k);e.mem=e.mem.filter(q=>q.s>=.05)})}
+function carve(p,d,deep){p.aff=clamp(p.aff+d,-1,1);p.bed=clamp(p.bed+d*.02,-1,1);p.rut=clamp(p.rut+(deep?.02:.006)*(1-p.rut),0,1);p.count++;total++}
+
+function pickGossipTarget(si,sj){
+  const mx=(E[si].x+E[sj].x)/2,my=(E[si].y+E[sj].y)/2;let bk=-1,bs=-1e9;
+  for(let m=0;m<N;m++){if(m===si||m===sj)continue;
+    let iso=0;for(let o=0;o<N;o++)if(o!==m)iso+=Math.hypot(E[m].x-E[o].x,E[m].y-E[o].y);
+    const sc=Math.hypot(E[m].x-mx,E[m].y-my)*.6+iso/(N-1)*.5+(m===lastTrouble?90:0)-(PR[si][m].aff+PR[sj][m].aff)*40+rnd(-15,15);
+    if(sc>bs){bs=sc;bk=m}}
+  return bk;
+}
+
+function fire(i,j,cat){
+  if(draining)return;
+  const now=Date.now(),e=E[i];e.t=0;e.period=clamp(e.period*rnd(.88,1.16),12,36);
+  if(j==null){
+    const w=E.map((o,k)=>{if(k===i)return 0;const p=PR[i][k],dist=Math.hypot(o.x-e.x,o.y-e.y),near=clamp(1-dist/(Math.hypot(W,H)*.55),.1,1);
+      return (.18+Math.abs(p.aff)*.65+p.rut*.55)*near*(k===lastSp?.3:1)*(grudge(i,k)?1.6:1)*(.4+.6*o.lv)});
+    const s=w.reduce((a,b)=>a+b,0);let r=Math.random()*s;j=w.findIndex(x=>(r-=x)<=0);if(j<0||j===i)j=(i+1)%N;
+  }
+  const p=PR[i][j],a=p.aff,m=(p.rut>.38&&Math.random()<p.rut*.82)?'e':(a>.3?'w':a<-.3?'c':'m');
+  const pl=PL[p.i+'-'+p.j],r=Math.random(),silP=.12+(1-E[j].lv)*.22;
+  let si=i,sj=j,k=-1,x,y,z3=null,d=0,sil=0,tp=0,deep=0,topic=E[i].w;
+  const nearDrop=drops.find(dr=>Math.hypot(dr.x-e.x,dr.y-e.y)<95),gr=grudge(i,j);
+  if(cat==='ret'){x=fresh(V[si].ret);y=fresh(V[sj].r[m]);if(Math.random()<.65)z3=fresh(V[si].c3[m]);d=.06;tp=1}
+  else if(e.lv<.28&&Math.random()<.6){x=fresh(V[si].lo);if(Math.random()<.5){y='……';sil=1}else y=fresh(V[sj].r[m])}
+  else if(gr&&Math.random()<.35){topic=gr.w;deep=1;x=fresh(V[si].mm);
+    if(recall(sj,si,topic)>.3){y=fresh(V[sj].mr1);d=a>.3?.03:-.05;if(Math.random()<.5)z3=fresh(V[si].c3[m])}
+    else{y=fresh(V[sj].mr0);z3=fresh(V[si].mf);d=-.03}
+    remember(si,sj,topic,.2);remember(sj,si,topic,.25);Sound.playBond()}
+  else if(nearDrop&&Math.random()<.48){x=fresh(V[si].dr);y=fresh(V[sj].r[m]);if(Math.random()<.5)z3=fresh(V[i].c3[m]);d=nearDrop.kind==='warm'?.09:.06}
+  else if(r<silP){x=fresh(V[i].o[m]);y='……';d=-.05;sil=1}
+  else if(r<silP+.22&&pl&&p.i!==lastSp){const q=fresh(pl);si=p.i;sj=p.j;x=q[0];y=q[1];z3=q[2];d=q[3]}
+  else if(r<silP+.42){x=fresh(V[i].tp);y=fresh(V[j].r[m]);if(Math.random()<.52)z3=fresh(V[i].c3[m]);d=rnd(-.08,.08);tp=1;
+    remember(si,sj,topic,.35);remember(sj,si,topic,.35)}
+  else if(r<silP+.56){k=pickGossipTarget(si,sj);x=V[i].g;y=fresh(V[j].r[m]);if(Math.random()<.4)z3=fresh(V[i].c3[m]);d=.06}
+  else{x=fresh(V[i].o[m]);y=fresh(V[j].r[m]);if(Math.random()<.5)z3=fresh(V[i].c3[m]);
+    d=m==='e'?rnd(-.06,.05):m==='w'?rnd(-.18,.08):m==='c'?rnd(-.08,.18):rnd(-.1,.1)}
+  if(z3&&!deep&&E[si].lv<.35)z3=null;
+
+  busy=now+(z3?4600:3100);lastSp=si;E[si].t=0;E[si].fat+=.06;
+  const f=s=>s.replaceAll('{x}',()=>E[sj].n).replaceAll('{y}',()=>k>=0?E[k].n:'').replaceAll('{t}',()=>topic);
+  const dtNow=new Date(),hhmm=String(dtNow.getHours()).padStart(2,'0')+':'+String(dtNow.getMinutes()).padStart(2,'0');
+  const t1=f(x),t2=f(y),t3=z3?f(z3):null;
+  const echoEntry={time:hhmm,lines:[{i:si,text:t1,r:0}]};
+  pushEcho(echoEntry);
+
+  say(si,t1,0,m);
+  later(()=>{
+    if(draining)return;
+    say(sj,t2,1,m);echoEntry.lines.push({i:sj,text:t2,r:1});renderEchoes();
+    lastSp=sj;E[sj].fat+=.04;
+    carve(p,d,deep);p.pulse=1;if(cat==='ret')p.flash=1;
+    if(sil||d<=-.1)lastTrouble=sil?sj:si;
+    if(!sil&&(tp||deep||p.aff>0||p.rut>.45||Math.random()<.42))E[sj].w=topic;
+    if(Math.random()<.1)E[si].w=pick(TOP);
+    E[sj].t=clamp(E[sj].t+8,15,65);E[si].speak=E[sj].speak=1;
+    if(k>=0){const q=PR[sj][k];q.aff=clamp(q.aff-.12,-1,1);q.flash=1;lastTrouble=k}
+    if(!sil&&t3){
+      later(()=>{if(draining)return;say(si,t3,0,m);echoEntry.lines.push({i:si,text:t3,r:0});renderEchoes();E[si].speak=1;E[si].fat+=.03;lastSp=si;if(E[si].t>65)E[si].t=55},1450);
+    }else if(!sil&&Math.random()<.26){
+      const cand=[];for(let z=0;z<N;z++)if(z!==si&&z!==sj&&z!==k&&E[z].lv>.2)cand.push(z);
+      if(cand.length){
+        cand.sort((a,b)=>Math.hypot(E[a].x-E[si].x,E[a].y-E[si].y)-Math.hypot(E[b].x-E[si].x,E[b].y-E[si].y));
+        const z=cand[0];if(tp&&Math.random()<.45)E[z].w=topic;busy=Date.now()+1800;
+        later(()=>{if(draining)return;say(z,V[z].tic,0,m);echoEntry.lines.push({i:z,text:V[z].tic,r:0});renderEchoes();E[z].speak=1;lastSp=z;if(E[z].t>68)E[z].t=62},1150);
+      }
+    }
+  },1700);
+}
+
+function step(dt){
+  const tm=Date.now()/1000;
+  const drainProg=draining?clamp((Date.now()-drainAt)/11500,0,1):0;
+  const waterY=6+(H-10)*drainProg;
+
+  for(let i=bubbles.length-1;i>=0;i--){
+    const b=bubbles[i];b.age+=dt;b.y-=b.vy*dt;b.x+=Math.sin(tm*3+b.ph)*8*dt;
+    if(b.y<=waterY+2||b.age>=b.maxAge)bubbles.splice(i,1);
+  }
+  motes.forEach(m=>{
+    m.x+=(Math.sin(tm*.25+m.ph)*4+2*m.z)*dt;
+    m.y+=Math.cos(tm*.19+m.ph*1.3)*3*dt;
+    if(m.x<6)m.x=W-8;if(m.x>W-6)m.x=8;
+    const minY=Math.min(H-14,waterY+6);
+    if(m.y<minY)m.y=H-18;if(m.y>H-12)m.y=minY;
+  });
+
+  if(draining){
+    E.forEach((e,i)=>{e.vx*=1-2.5*dt;e.vy*=1-2.5*dt;e.x=clamp(e.x+e.vx*dt,26,W-26);e.y=clamp(e.y+e.vy*dt,26,H-30);
+      e.speak*=Math.pow(.25,dt);if(dead[i])fade[i]=Math.max(0,fade[i]-dt*.85)});
+    P.forEach(p=>{p.pulse*=Math.pow(.2,dt);p.flash*=Math.pow(.2,dt)});
+    return;
+  }
+  updateLevels(dt);decayMem(dt);
+  const S=Math.min(W,H*1.35),cx=W/2,cy=H/2;
+  const kAff=1-Math.exp(-dt/TAU_AFF),kBed=1-Math.exp(-dt/TAU_BED),kRut=Math.exp(-dt/TAU_RUT);
+  for(let i=drops.length-1;i>=0;i--){const dr=drops[i];dr.age+=dt;
+    dr.y=clamp(dr.y+Math.sin(tm*1.5+dr.seed)*2*dt,24,H-24);dr.x=clamp(dr.x+Math.cos(tm*1.2+dr.seed)*2*dt,24,W-24);
+    if(dr.age>=dr.maxAge)drops.splice(i,1)}
+  P.forEach(p=>{
+    const a=E[p.i],b=E[p.j];let dx=b.x-a.x,dy=b.y-a.y;const d=Math.hypot(dx,dy)||1;
+    const tg=S*(.16+.52*(1-p.aff)/2)*(1-p.rut*.52)+S*.26*p.rut*.52;
+    const str=(p.aff>.25||p.rut>.45)?2.5:(d>S*.48?.65:1.5),f=(d-tg)*str*dt/d;
+    a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f;
+    p.aff=clamp(p.aff+(p.bed-p.aff)*kAff+rnd(-1,1)*.02*dt,-1,1);
+    drops.forEach(dr=>{
+      if(dr.kind==='warm'){
+        const da=Math.hypot(a.x-dr.x,a.y-dr.y),db=Math.hypot(b.x-dr.x,b.y-dr.y);
+        if(da<140&&db<140)p.aff=clamp(p.aff+.015*dt,-1,1);
+      }
+    });
+    p.bed+=(p.aff-p.bed)*kBed;p.rut*=kRut;
+    p.pulse*=Math.pow(.35,dt);p.flash*=Math.pow(.3,dt);
+  });
+  E.forEach((e,i)=>{
+    const amp=.6+.4*e.lv;
+    const wx=cx+(Math.sin(tm/9+e.ph)*W*.28+Math.cos(tm/21+i*2)*W*.1)*amp;
+    const wy=cy+(Math.cos(tm/11+e.ph)*H*.28+Math.sin(tm/17+i*2)*H*.1)*amp;
+    e.vx+=(wx-e.x)*(.25+.25*e.lv)*dt;e.vy+=(wy-e.y)*(.3+.25*e.lv)*dt;
+    drops.forEach(dr=>{const dx=dr.x-e.x,dy=dr.y-e.y,dist=Math.hypot(dx,dy)||1;
+      if(dist<260&&dr.age>.8){const pull=clamp(1-dist/260,0,1)*(1-dr.age/dr.maxAge)*26*(.4+.6*e.lv);
+        e.vx+=dx/dist*pull*dt;e.vy+=dy/dist*pull*dt;if(dist<90)e.t+=dt*2.4}
+      if(dr.kind==='clear'&&dist<140){
+        e.fat=Math.max(0,e.fat-.04*dt);
+        e.lv=clamp(e.lv+.02*dt,.05,1);
+      }
+    });
+    e.vx*=1-1.85*dt;e.vy*=1-1.85*dt;
+    e.x=clamp(e.x+e.vx*dt,26,W-26);e.y=clamp(e.y+e.vy*dt,26,H-30);
+    const fr=E.reduce((s,o,k)=>k===i?s:s+Math.abs(PR[i][k].aff)+PR[i][k].rut*.4,0)/(N-1);
+    e.t+=dt*100/e.period*(1+.4*fr)*(.45+.9*e.lv);e.speak*=Math.pow(.2,dt);
+  });
+  if(Date.now()<busy)return;
+  for(let i=0;i<N;i++){const e=E[i];if(e.t>=100){
+    if(i===lastSp&&!ret){e.t=68;continue}
+    if(ret&&ret.p.i===i){fire(i,ret.p.j,'ret');ret=null;break}else if(!ret){fire(i);break}}}
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);ctx.lineCap='round';const tm=Date.now(),S=Math.min(W,H*1.35),maxD=S*.56;
+  const lineFade=draining?clamp(1-(tm-drainAt)/3600,0,1):1;
+  const drainProg=draining?clamp((tm-drainAt)/11500,0,1):0;
+  const waterY=6+(H-10)*drainProg;
+  const ph=getActivePhase(),pal=(isLight?PHASE_PAL.light:PHASE_PAL.dark)[ph];
+
+  // 1. 水域グラデーション・光の柱・コースティクス・微生物
+  const rayCenters=[];
+  for(let k=0;k<4;k++)rayCenters.push(W*(.16+k*.22)+Math.sin(tm/4200+k*1.7)*26);
+
+  if(waterY<H-3){
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0,waterY);
+    for(let x=0;x<=W;x+=24){
+      const wy=waterY+Math.sin(x/42+tm/1100)*1.3+Math.cos(x/21-tm/800)*.7;
+      ctx.lineTo(x,wy);
+    }
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+    ctx.clip();
+
+    const wg=ctx.createLinearGradient(0,waterY,0,H);
+    wg.addColorStop(0,pal.top);wg.addColorStop(1,pal.bot);
+    ctx.fillStyle=wg;ctx.fillRect(0,waterY-3,W,H-waterY+3);
+
+    // 光の柱（4本）
+    const rayH=Math.max(40,(H-waterY)*.92);
+    rayCenters.forEach((rx,k)=>{
+      const w1=24+k*6,w2=w1*2.35,dx=rayH*pal.tilt;
+      const rg=ctx.createLinearGradient(rx,waterY,rx+dx,waterY+rayH);
+      rg.addColorStop(0,pal.ray);rg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rg;
+      ctx.beginPath();
+      ctx.moveTo(rx-w1*.5,waterY-2);
+      ctx.lineTo(rx+w1*.5,waterY-2);
+      ctx.lineTo(rx+dx+w2*.5,waterY+rayH);
+      ctx.lineTo(rx+dx-w2*.5,waterY+rayH);
+      ctx.closePath();ctx.fill();
+    });
+
+    // コースティクス（水面直下の揺らぎ）
+    ctx.strokeStyle=pal.surf;ctx.lineWidth=1;
+    for(let c=0;c<3;c++){
+      ctx.globalAlpha=pal.caustic*(.7+.3*Math.sin(tm/1700+c));
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=20){
+        const cy=waterY+12+c*11+Math.sin(x/34+tm/1300+c*2)*3.2;
+        if(x===0)ctx.moveTo(x,cy);else ctx.lineTo(x,cy);
+      }
+      ctx.stroke();
+    }
+
+    // 浮遊する微粒子（motes）
+    ctx.fillStyle=pal.mote;
+    motes.forEach(m=>{
+      if(m.y<waterY+2)return;
+      let glimmer=0;
+      for(let k=0;k<4;k++){
+        const dRay=Math.abs(m.x-(rayCenters[k]+(m.y-waterY)*pal.tilt));
+        if(dRay<42)glimmer=Math.max(glimmer,1-dRay/42);
+      }
+      ctx.globalAlpha=(.18+.22*m.z+glimmer*.48)*(1-drainProg*.6)*(0.75+0.25*Math.sin(tm/900+m.ph));
+      ctx.beginPath();ctx.arc(m.x,m.y,m.r*(1+glimmer*.35),0,7);ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  // 2. 水面メニスカス
+  if(waterY<H-4){
+    ctx.save();
+    ctx.strokeStyle=pal.surf;ctx.lineWidth=1.2;ctx.globalAlpha=1-drainProg*.5;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=16){
+      let wy=waterY+Math.sin(x/42+tm/1100)*1.3+Math.cos(x/21-tm/800)*.7;
+      drops.forEach(dr=>{if(dr.age<2.2){const dx=Math.abs(x-dr.x);if(dx<54)wy+=Math.sin(dx/5-dr.age*8)*(1-dr.age/2.2)*1.6}});
+      if(x===0)ctx.moveTo(x,wy);else ctx.lineTo(x,wy);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 3. 川底の堆積層
+  const sedRich=clamp(total/80,.18,1),avgRut=P.reduce((s,p)=>s+p.rut,0)/P.length;
+  ctx.save();
+  ctx.fillStyle=pal.sed;
+  for(let layer=0;layer<2;layer++){
+    ctx.globalAlpha=(.48+.42*sedRich)*(layer===0?.65:.95)*(1+avgRut*.25);
+    ctx.beginPath();
+    ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=24){
+      const baseH=H-(layer===0?16:9)-sedRich*4;
+      const sy=baseH+Math.sin(x/(layer===0?95:68)+layer*2.1)*4.5+Math.cos(x/43-layer)*2;
+      ctx.lineTo(x,sy);
+    }
+    ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+
+  // 4. 立ち昇る気泡
+  bubbles.forEach(b=>{
+    const fadeB=1-b.age/b.maxAge;
+    ctx.globalAlpha=.42*fadeB;
+    ctx.strokeStyle=b.c||pal.mote;ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.stroke();
+  });
+
+  // 5. 水面に落ちた粒（drops）
+  if(!draining){
+    drops.forEach(dr=>{const life=1-dr.age/dr.maxAge;
+      const dropCol=dr.kind==='warm'?(isLight?'#c86a46':'#f2aa82'):dr.kind==='clear'?(isLight?'#2b86ad':'#80d8f8'):(isLight?'#3b485e':'#eef2f8');
+      const ripCol=dr.kind==='warm'?'#e5a27a':dr.kind==='clear'?'#7bc6e8':(isLight?'#5c6b82':'#dce0e8');
+      if(dr.age<2.2){const rp=dr.age/2.2;ctx.globalAlpha=(1-rp)*(isLight?.44:.38);ctx.strokeStyle=ripCol;ctx.lineWidth=1;ctx.beginPath();ctx.arc(dr.x,dr.y,4+rp*44,0,7);ctx.stroke()}
+      if(dr.kind!=='topic'){
+        ctx.globalAlpha=.14*life*(.7+Math.sin(tm/450+dr.seed)*.3);ctx.strokeStyle=ripCol;ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(dr.x,dr.y,11+Math.sin(tm/550+dr.seed)*2.5,0,7);ctx.stroke();
+      }
+      ctx.globalAlpha=Math.min(1,life*1.2)*(isLight?.85:.78)*(.75+Math.sin(tm/350+dr.seed)*.25);ctx.fillStyle=dropCol;ctx.shadowColor=ripCol;ctx.shadowBlur=isLight?4:9;
+      ctx.beginPath();ctx.arc(dr.x,dr.y,3,0,7);ctx.fill();ctx.shadowBlur=0});
+  }
+
+  // 6. 関係性の糸（P）
+  if(lineFade>.01){
+    P.forEach(p=>{
+      const a=E[p.i],b=E[p.j],d=Math.hypot(b.x-a.x,b.y-a.y),df=clamp(1-(d-S*.24)/(maxD-S*.24),0,1);
+      const bd=p.aff>.3&&df>.15,cd=p.aff<-.3&&df>.2,en=p.rut>.42&&df>.18;
+      if(!draining&&bd!==p.bound){p.bound=bd;if(df>.2){p.flash=1;if(bd)Sound.playBond()}}
+      const alpha=Math.min(1,(bd?(.18+.52*p.aff)*df:cd?(.1-.16*p.aff)*df:en?(.12+p.rut*.22)*df:(df>.45?.05*df:0))+p.pulse*.5+p.flash*.35)*lineFade*Math.min(fade[p.i],fade[p.j]);
+      if(alpha<.012)return;
+      const g=ctx.createLinearGradient(a.x,a.y,b.x,b.y);g.addColorStop(0,a.c);g.addColorStop(1,b.c);
+      const w=Math.sin(tm/2500+p.i*3+p.j)*.12,mx=(a.x+b.x)/2+(b.y-a.y)*w,my=(a.y+b.y)/2-(b.x-a.x)*w;
+      ctx.strokeStyle=g;ctx.setLineDash(cd?[2,6]:(en&&!bd)?[7,5]:[]);ctx.globalAlpha=alpha;
+      ctx.lineWidth=(bd?.8+1.8*p.aff:en?.9+p.rut*.8:1)*Math.max(.5,df)+p.flash*1.8;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(mx,my,b.x,b.y);ctx.stroke();
+    });
+  }
+  ctx.setLineDash([]);
+
+  // 7. 5人の光の粒（E）
+  E.forEach((e,i)=>{
+    const fd=fade[i];if(fd<=.01)return;
+    const tr=(!draining&&e.t>=84)?1.4:0,x=e.x+rnd(-tr,tr),y=e.y+rnd(-tr,tr)+(draining?(1-fd)*14:0);
+    // 呼吸するハロー
+    const haloR=10+8*e.lv+Math.sin(tm/900+e.ph)*1.5;
+    const hg=ctx.createRadialGradient(x,y,1,x,y,haloR);
+    hg.addColorStop(0,e.c);hg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.globalAlpha=(.15+.16*e.lv)*fd;ctx.fillStyle=hg;
+    ctx.beginPath();ctx.arc(x,y,haloR,0,7);ctx.fill();
+
+    // 発話中の共鳴波紋
+    if(e.speak>.02){
+      ctx.globalAlpha=e.speak*.48*fd;ctx.strokeStyle=e.c;ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(x,y,6+(1-e.speak)*24,0,7);ctx.stroke();
+      if(e.speak<.82){
+        ctx.globalAlpha=e.speak*.26*fd;
+        ctx.beginPath();ctx.arc(x,y,4+(1-e.speak)*36,0,7);ctx.stroke();
+      }
+    }
+
+    ctx.globalAlpha=(.42+.58*e.lv)*fd;ctx.fillStyle=e.c;ctx.shadowColor=e.c;ctx.shadowBlur=(4+9*e.lv)*fd;
+    ctx.beginPath();ctx.arc(x,y,tr?6:5,0,7);ctx.fill();ctx.shadowBlur=0;
+
+    ctx.globalAlpha=.8*fd;ctx.fillStyle=sub;ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(e.n,x,y+19);
+    if(!draining&&(hoverChar===i||e.t>=80)){
+      ctx.globalAlpha=(hoverChar===i?.66:.44)*fd;ctx.fillStyle=sub;ctx.font='9.5px sans-serif';
+      ctx.fillText('['+e.w+']',x,y-13);
+    }
+  });
+  ctx.globalAlpha=1;
+}
+
+function catchUp(sec){
+  if(draining||sec<0)return;
+  clearTimers();busy=0;
+  Array.from(feed.children).forEach(el=>{el.classList.remove('show','latest');later(()=>el.remove(),500)});
+  const M=Math.min(240,Math.max(1,Math.ceil(sec/600))),h=sec/M,ns=Math.min(1,Math.sqrt(h/600)),cnt=P.map(()=>0),before=P.map(p=>p.aff);
+  for(let s=0;s<M;s++){
+    P.forEach((p,k)=>{
+      const rate=(.3+3*Math.pow(.5+.5*p.aff,2)+(grudge(p.i,p.j)||grudge(p.j,p.i)?1:0))/3600;
+      const n=Math.min(20,Math.floor(rate*h+Math.random()));
+      for(let c=0;c<n;c++){carve(p,rnd(-.12,.12),0);cnt[k]++;
+        if(Math.random()<.25){const a=Math.random()<.5?p.i:p.j,b=a===p.i?p.j:p.i;E[b].w=E[a].w;remember(a,b,E[a].w,.3);remember(b,a,E[a].w,.3)}}
+      p.aff=clamp(p.aff+(p.bed-p.aff)*(1-Math.exp(-h/TAU_AFF))+rnd(-.1,.1)*ns,-1,1);
+      p.bed+=(p.aff-p.bed)*(1-Math.exp(-h/TAU_BED));p.rut*=Math.exp(-h/TAU_RUT);
+    });
+    decayMem(h);
+  }
+  E.forEach(e=>e.fat=0);
+  let bi=0,best=-1;P.forEach((p,k)=>{const sc=cnt[k]+Math.abs(p.aff-before[k])*10;if(sc>best){best=sc;bi=k}});
+  if(sec>=10){E.forEach(e=>e.t=rnd(20,60));ret={p:P[bi]};E[P[bi].i].t=96;E[P[bi].j].w=E[P[bi].i].w;lastSp=-1}
+  settle();updateTankStatus();
+}
+function settle(){for(let s=0;s<80;s++)step(.05);E.forEach(e=>e.t=Math.min(e.t,96))}
+
+function resize(){
+  dpr=Math.min(2,devicePixelRatio||1);
+  W=Math.max(120,(cv.parentElement?.clientWidth||innerWidth)-24);H=innerWidth<=520?330:380;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cs=getComputedStyle(document.documentElement);
+  sub=cs.getPropertyValue('--sub').trim()||sub;
+  isLight=cs.colorScheme==='light'||!!matchMedia?.('(prefers-color-scheme: light)').matches;
+  if(!motes.length)initMotes();
+}
+
+// ===== 川底の表示 =====
+const bars=[],cells=[];
+E.forEach(e=>{const r=document.createElement('div');r.className='row';r.style.setProperty('--c',e.c);r.innerHTML='<i>'+e.n+'</i><div class="bar"><div></div></div><span></span>';$('rows').append(r);bars.push(r)});
+(function(){const g=$('grid');g.append(document.createElement('span'));E.forEach(e=>{const s=document.createElement('span');s.textContent=e.n;s.style.color=e.c;g.append(s)});
+  for(let i=0;i<N;i++){const s=document.createElement('span');s.textContent=E[i].n;s.style.color=E[i].c;g.append(s);
+    for(let j=0;j<N;j++){const c=document.createElement('span');g.append(c);cells.push(c)}}})();
+function grudgeList(){const L=[];E.forEach((e,i)=>e.mem.forEach(q=>{if(q.n>=3&&q.s>=.5)L.push(e.n+'→'+E[q.j].n+'「'+q.w+'」×'+q.n+(recall(q.j,i,q.w)>.3?'':'（相手は忘れている）'))}));return L}
+function xray(){
+  E.forEach((e,i)=>{bars[i].querySelector('.bar div').style.width=Math.min(100,e.t)+'%';bars[i].querySelector('span').textContent='水位'+Math.round(e.lv*100)+'% ['+e.w+']'});
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){const c=cells[i*N+j];if(i===j){c.textContent='·';c.className='';continue}
+    const p=PR[i][j],a=p.aff,badge=p.bound?'結':p.rut>.42?'溝':a<-.3?'氷':'';
+    c.textContent=Math.round(a*100)+badge;
+    c.className=(p.bound?'bound ':'')+(p.rut>.42?'rut':'');
+    c.title=`${E[i].n}×${E[j].n}: 水流${Math.round(a*100)} / 川底${Math.round(p.bed*100)} / 溝${Math.round(p.rut*100)}%`;
+    c.style.background=(a>0?'rgba(212,140,112,':'rgba(107,154,196,')+Math.abs(a)*.6+')'}
+  const g=grudgeList();$('mems').textContent=g.length?'因縁\n'+g.join('\n'):'因縁はまだない';
+  $('meta').textContent='水槽 '+(Math.max(0,Date.now()-born)/MS_DAY+1|0)+'日目 | 累計渦 '+total+'回 | 深い溝 '+P.filter(p=>p.rut>.42).length+'組 | 結ばれた線 '+P.filter(p=>p.bound).length+'/'+P.length;
+}
+
+// ===== 遺書（最後の独白）と2層遺骨JSON =====
+function buildDrainScript(){
+  const items=[];
+  for(let i=0;i<N;i++){
+    const e=E[i],set=LW[i];
+    let key='d',other=-1,topic=e.w,score=e.mem.length*15;
+    // 2 & 3: 因縁チェック
+    const gs=e.mem.filter(q=>q.n>=3&&q.s>=.5).sort((a,b)=>b.s-a.s);
+    const unreq=gs.find(q=>recall(q.j,i,q.w)<=.3);
+    const shared=gs.find(q=>recall(q.j,i,q.w)>.3);
+    // 4: 最大rut
+    const fb=(i+1)%N;let maxRut=0,rutJ=fb,maxAbsBed=0,bedJ=fb,bedVal=0;
+    for(let k=0;k<N;k++){if(k===i)continue;const p=PR[i][k];
+      if(p.rut>maxRut){maxRut=p.rut;rutJ=k}
+      if(Math.abs(p.bed)>maxAbsBed){maxAbsBed=Math.abs(p.bed);bedJ=k;bedVal=p.bed}}
+    score+=maxRut*300+maxAbsBed*100;
+    if(total<15){key='s'}
+    else if(unreq){key='u';other=unreq.j;topic=unreq.w;score+=1000}
+    else if(shared){key='m';other=shared.j;topic=shared.w;score+=600}
+    else if(maxRut>=.42){key='r';other=rutJ;score+=350}
+    else if(maxAbsBed>=.3){key=bedVal>0?'w':'c';other=bedJ;score+=120}
+    const pair=pick(set[key]),fmt=s=>s.replaceAll('{x}',()=>other>=0?E[other].n:'誰か').replaceAll('{t}',()=>topic);
+    items.push({i,name:e.n,lines:[fmt(pair[0]),fmt(pair[1])],score:score+rnd(0,5)});
+  }
+  return items.sort((a,b)=>a.score-b.score);
+}
+
+function buildNarrativeMemory(lw){
+  const days=Math.max(0,(Date.now()-born)/MS_DAY);
+  const ageText=days<.5?'まだ水を入れたばかり':days<2?'一晩を過ぎたばかりの頃':days<7?'数日が過ぎた頃':days<20?'十日あまり':days<45?'ひと月ほど':days<90?'ふた月あまり':'長い歳月を重ねたあと';
+  const rel=[];
+  P.forEach(p=>{
+    const a=E[p.i].n,b=E[p.j].n;
+    if(p.rut>=.6&&p.bed<-.15)rel.push(a+'と'+b+'は反りが合わず棘のある言葉ばかり交わしていたが、それでもなぜかいつも隣に居座る深い腐れ縁だった');
+    else if(p.rut>=.42&&p.bed<-.15)rel.push(a+'と'+b+'は冷たいやり取りが続いても離れ切らず、付かず離れずの距離に留まっていた');
+    else if(p.rut>=.6&&p.bed>=.15)rel.push(a+'と'+b+'は長い時間を共にして空気のような慣れ合いになり、言葉を交わさなくてもそばにいた');
+    else if(p.rut>=.42)rel.push(a+'と'+b+'は何度も同じ場所で行き会い、気だるい惰性の中で同じ空気を吸っていた');
+    else if(p.bed>.32)rel.push(a+'と'+b+'は自然と引き寄せられ、互いの隣にいると少し息がしやすそうだった');
+    else if(p.bed<-.32)rel.push(a+'と'+b+'は最後まで距離を保ち、あまり踏み込もうとはしなかった');
+    else if(p.count>=6)rel.push(a+'と'+b+'はときどき短い言葉を交わしながら、遠すぎず近すぎずの間合いで漂っていた');
+  });
+  const mems=[],seen=new Set();
+  E.forEach((e,i)=>e.mem.forEach(q=>{if(q.n<3||q.s<.5)return;const key=[Math.min(i,q.j),Math.max(i,q.j),q.w].join('|');
+    if(recall(q.j,i,q.w)>.3){if(!seen.has(key)){seen.add(key);mems.push(e.n+'と'+E[q.j].n+'の間には「'+q.w+'」の話が何度も浮かんでは沈み、最後まで二人ともそれを覚えていた')}}
+    else mems.push(e.n+'だけは'+E[q.j].n+'との間の「'+q.w+'」を最後まで覚えていたが、'+E[q.j].n+'のほうはもう忘れてしまっていた');
+  }));
+  return{
+    過ごした日々:ageText,
+    水底に残った関係:rel.length?rel:['五人はまだ互いの輪郭を確かめ合うような静かな距離にいた'],
+    片覚えと共有の記憶:mems.length?mems:['誰かの記憶に深く刺さったままの出来事は、まだ残っていなかった'],
+    最後に見つめていたもの:E.map(e=>e.n+'の頭の中には最後まで「'+e.w+'」が残っていた'),
+    五人の最後の言葉:lw.map(x=>({名前:x.name,言葉:x.lines}))
+  };
+}
+
+const STORY_PROMPT='あなたは今、ある小さな水槽で過ごした五人の記憶を受け取りました。以下の「記憶」と「五人の最後の言葉」だけを手がかりに、仕組みや数値、英語の変数名は一切出さず、五人の情景と余白が浮かぶひとつの静かな短い物語（四百〜八百字ほど）として語り直してください。「五人の最後の言葉」は別れ際に実際に口にした言葉として、物語の終盤にそのままの言葉遣いで織り込んでください。「地層_復元用」のデータは物語には使わないでください。';
+
+function buildRelicPayload(lw){
+  const snap=snapshot();
+  snap.drainedAt=new Date().toISOString();
+  const payload={
+    app:'latent-terrarium',
+    version:'1.0',
+    exportedAt:snap.drainedAt,
+    '語り部（生成AI）へのお願い':STORY_PROMPT,
+    '記憶':buildNarrativeMemory(lw),
+    '地層_復元用':snap
+  };
+  if(DEBUG)payload['観測数値_デバッグ']=summary();
+  return payload;
+}
+
+function buildStoryPromptText(payload){
+  const m=payload['記憶'];
+  return [
+    '【語り部へのお願い】',
+    STORY_PROMPT,
+    '',
+    '【過ごした日々】',
+    m['過ごした日々'],
+    '',
+    '【水底に残った関係】',
+    ...m['水底に残った関係'].map(s=>'・'+s),
+    '',
+    '【片覚えと共有の記憶】',
+    ...m['片覚えと共有の記憶'].map(s=>'・'+s),
+    '',
+    '【最後に見つめていたもの】',
+    ...m['最後に見つめていたもの'].map(s=>'・'+s),
+    '',
+    '【五人の最後の言葉（消えていった順に）】',
+    ...m['五人の最後の言葉'].map(x=>x['名前']+'「'+x['言葉'].join(' ') +'」')
+  ].join('\n');
+}
+
+function buildShareText(payload){
+  const m=payload['記憶'],snap=payload['地層_復元用'];
+  const days=(Math.max(0,(snap.seen||Date.now())-born)/MS_DAY+1)|0;
+  const lines=m['五人の最後の言葉'].map(x=>x['名前']+'「'+x['言葉'][0]+' '+x['言葉'][1]+'」');
+  return [
+    `Latent Terrarium｜水槽 ${days}日目・累計渦 ${snap.total}回`,
+    ...lines,
+    '#LatentTerrarium'
+  ].join('\n');
+}
+
+function downloadRelic(payload){
+  try{
+    const a=document.createElement('a'),d=new Date(),ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+    a.download='latent-terrarium-'+ds+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+  }catch(e){}
+}
+
+function copyText(txt,cb){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>cb(true)).catch(()=>fallbackCopy(txt,cb));
+  }else fallbackCopy(txt,cb);
+}
+function fallbackCopy(txt,cb){
+  try{const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');
+    ta.style.cssText='position:fixed;top:0;left:-9999px;opacity:0;font-size:16px';
+    document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,txt.length);
+    const ok=document.execCommand('copy');ta.remove();cb(ok)}catch(e){cb(false)}
+}
+
+function sayDrain(i,line1,line2,r){
+  Array.from(feed.children).forEach(el=>el.classList.remove('latest'));
+  const d=document.createElement('div');d.className='b'+(r?' r':'')+' latest';d.style.setProperty('--c',E[i].c);
+  const n=document.createElement('b');n.textContent=E[i].n;
+  const s1=document.createElement('span');s1.textContent=line1;
+  const s2=document.createElement('span');s2.className='b2';s2.textContent=line2;
+  d.append(n,s1,s2);feed.append(d);
+  requestAnimationFrame(()=>d.classList.add('show'));
+  Sound.playFarewell(i);
+  later(()=>{s2.classList.add('show')},850);
+}
+
+function startDrain(){
+  if(draining)return;
+  if(!confirm('水を抜くと、これまでの川底はすべて消え、最後に一度だけ記録が落ちます。水を入れ替えますか？'))return;
+  draining=true;noSave=true;clearTimers();drops=[];bubbles=[];drainAt=Date.now();
+  Sound.playDrainStart();
+  $('xray').classList.add('hidden');$('bX').textContent='川底を見る';
+  $('bX').style.pointerEvents='none';$('bX').style.opacity='.35';$('bX').tabIndex=-1;
+  $('dropBar').style.pointerEvents='none';$('dropBar').style.opacity='.4';
+  Array.from(feed.children).forEach(el=>{el.classList.remove('show','latest');later(()=>el.remove(),480)});
+
+  const lw=buildDrainScript(),payload=buildRelicPayload(lw);
+  lw.forEach((item,idx)=>{
+    const t0=700+idx*2200;
+    later(()=>{E[item.i].speak=1;sayDrain(item.i,item.lines[0],item.lines[1],idx%2===1)},t0);
+    later(()=>{dead[item.i]=1},t0+1650);
+  });
+
+  const endMs=700+4*2200+1650+3500;
+  later(()=>{
+    wipeStorage();
+    downloadRelic(payload);
+    feed.style.opacity='0';
+    later(()=>{
+      feed.innerHTML='';
+      const ep=document.createElement('div');ep.className='epitaph';
+      ep.innerHTML='<div>水が抜けました。この水槽の記憶は、ここで終わりです。</div><div class="epitaph-btns"><button id="bPick">記録を拾う (.json)</button><button id="bCopy">AI用に文章をコピー</button><button id="bShare">X用に余韻をコピー</button><button id="bFresh">新しい水を張る</button></div>';
+      feed.appendChild(ep);feed.style.opacity='1';
+      requestAnimationFrame(()=>ep.classList.add('show'));
+      $('bPick').onclick=()=>downloadRelic(payload);
+      $('bCopy').onclick=ev=>copyText(buildStoryPromptText(payload),ok=>{
+        ev.target.textContent=ok?'コピーしました（AIに貼り付けできます）':'記録を拾うを使ってください';
+      });
+      $('bShare').onclick=ev=>copyText(buildShareText(payload),ok=>{
+        ev.target.textContent=ok?'X用にコピーしました':'コピーできませんでした';
+      });
+      $('bFresh').onclick=()=>location.reload();
+    },600);
+  },endMs);
+}
+
+// ===== 記録（localStorage + IndexedDB 二重保存）=====
+function idbOp(mode,fn,done){
+  let called=false,db=null;
+  const end=()=>{if(db){try{db.close()}catch(e){}db=null}if(!called){called=true;done&&done()}};
+  try{if(typeof indexedDB==='undefined')return end();const rq=indexedDB.open(DBN,1);
+    rq.onupgradeneeded=()=>{if(!rq.result.objectStoreNames.contains('kv'))rq.result.createObjectStore('kv')};
+    rq.onerror=end;rq.onblocked=end;
+    rq.onsuccess=()=>{db=rq.result;try{const tx=db.transaction('kv',mode);tx.oncomplete=end;tx.onerror=end;tx.onabort=end;fn(tx.objectStore('kv'))}catch(e){end()}};
+  }catch(e){end()}
+}
+function snapshot(){return{schema:SCHEMA,born,seen:Date.now(),total,reborn,
+  p:P.map(p=>[+p.aff.toFixed(3),+p.bed.toFixed(3),+p.rut.toFixed(4),p.count]),
+  e:E.map(e=>({per:+e.period.toFixed(1),w:e.w,ph2:+e.ph2.toFixed(3),mem:e.mem.map(q=>[q.w,q.j,q.n,+q.s.toFixed(3)])})),
+  echoes:echoes.slice(0,8).map(ec=>({time:ec.time,lines:ec.lines.map(l=>({i:l.i,text:l.text,r:l.r?1:0}))}))}}
+function apply(s){
+  born=Number.isFinite(s.born)?s.born:Date.now();total=Number.isFinite(s.total)&&s.total>=0?s.total:0;reborn=Number.isFinite(s.reborn)&&s.reborn>=0?s.reborn:0;
+  P.forEach((p,k)=>{p.aff=clamp(s.p[k][0],-1,1);p.bed=clamp(s.p[k][1],-1,1);p.rut=clamp(s.p[k][2],0,1);p.count=Math.max(0,s.p[k][3]|0);p.bound=p.aff>.3});
+  s.e.forEach((q,i)=>{const e=E[i];e.period=Number.isFinite(q.per)?clamp(q.per,10,40):e.period;e.w=typeof q.w==='string'&&q.w?q.w:e.w;
+    e.ph2=Number.isFinite(q.ph2)?q.ph2:e.ph2;
+    e.mem=Array.isArray(q.mem)?q.mem.filter(m=>Array.isArray(m)&&typeof m[0]==='string'&&Number.isInteger(m[1])&&m[1]>=0&&m[1]<N&&m[1]!==i&&Number.isFinite(m[2])&&Number.isFinite(m[3])).map(([w,j,n,sv])=>({w,j,n:Math.max(1,n|0),s:clamp(sv,0,1)})):[]});
+  if(Array.isArray(s.echoes)){
+    echoes=s.echoes.slice(0,8).filter(ec=>ec&&typeof ec.time==='string'&&Array.isArray(ec.lines))
+      .map(ec=>({time:ec.time,lines:ec.lines.filter(l=>l&&Number.isInteger(l.i)&&l.i>=0&&l.i<N&&typeof l.text==='string').map(l=>({i:l.i,text:l.text,r:l.r?1:0}))}))
+      .filter(ec=>ec.lines.length>0);
+    renderEchoes();
+  }
+}
+const valid=s=>Boolean(s&&(s.schema===5||s.schema===SCHEMA)&&Array.isArray(s.p)&&s.p.length===P.length&&s.p.every(x=>Array.isArray(x)&&x.length>=4&&x.slice(0,4).every(Number.isFinite))&&Array.isArray(s.e)&&s.e.length===N&&s.e.every(x=>x&&typeof x==='object'));
+function save(){if(noSave||draining||loading)return;const s=snapshot();try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}idbOp('readwrite',st=>st.put(s,KEY))}
+function wipeStorage(){try{localStorage.removeItem(KEY)}catch(e){}idbOp('readwrite',st=>st.delete(KEY))}
+function load(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(valid(s)){apply(s);const sec=Number.isFinite(s.seen)?Math.max(0,(Date.now()-s.seen)/1000):0;if(sec>=10)catchUp(sec);else settle()}
+  else{
+    settle();
+    if(typeof indexedDB!=='undefined'){
+      loading=true;
+      let db=null,doneCalled=false;
+      const timer=setTimeout(()=>done(),3000);
+      function done(){if(doneCalled)return;doneCalled=true;clearTimeout(timer);if(db){try{db.close()}catch(e){}db=null}loading=false}
+      try{
+        const rq=indexedDB.open(DBN,1);
+        rq.onupgradeneeded=()=>{if(!rq.result.objectStoreNames.contains('kv'))rq.result.createObjectStore('kv')};
+        rq.onerror=done;rq.onblocked=done;
+        rq.onsuccess=()=>{
+          db=rq.result;
+          try{
+            const tx=db.transaction('kv','readonly');
+            tx.onerror=done;tx.onabort=done;
+            const r=tx.objectStore('kv').get(KEY);
+            r.onerror=done;
+            r.onsuccess=()=>{
+              const bk=r.result;
+              if(!draining&&!noSave&&total===0&&valid(bk)){
+                clearTimers();busy=0;feed.innerHTML='';apply(bk);
+                const sec=Number.isFinite(bk.seen)?Math.max(0,(Date.now()-bk.seen)/1000):0;
+                if(sec>=10)catchUp(sec);else settle();
+              }
+              done();
+            };
+          }catch(e){done()}
+        };
+      }catch(e){done()}
+    }
+  }
+}
+function summary(){return{水槽の年齢_日:+(Math.max(0,Date.now()-born)/MS_DAY).toFixed(2),累計渦:total,
+  水位:E.map(e=>e.n+' '+Math.round(e.lv*100)+'%'),
+  関係:P.map(p=>({ペア:E[p.i].n+'-'+E[p.j].n,水流:+p.aff.toFixed(2),川底:+p.bed.toFixed(2),溝:+p.rut.toFixed(2),会話:p.count})),
+  因縁:grudgeList(),気になっている言葉:E.map(e=>e.n+' '+e.w)}}
+
+$('bExp').onclick=()=>downloadRelic(buildRelicPayload(buildDrainScript()));
+$('bImp').onclick=()=>$('fImp').click();
+$('fImp').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const d=JSON.parse(String(rd.result).replace(/^\uFEFF/,'')),s=d['地層_復元用']||d.state||d;if(!valid(s))throw 0;
+    if(!confirm('今の水槽を、読み込んだ記録に置き換えます。'))return;
+    s.seen=Date.now();s.reborn=(s.reborn||0)+1;noSave=true;
+    try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+    let done=false;const go=()=>{if(!done){done=true;location.reload()}};
+    idbOp('readwrite',st=>st.put(s,KEY),go);setTimeout(go,450)}catch(e){alert('この記録は読み込めませんでした。')}};
+  rd.readAsText(f);ev.target.value=''};
+$('bRst').onclick=startDrain;
+
+if(DEBUG){$('bExp').classList.remove('hidden');$('bD1').classList.remove('hidden');$('bD2').classList.remove('hidden');
+  $('bD1').onclick=()=>{born-=3*3600*1000;catchUp(3*3600);xray();save()};
+  $('bD2').onclick=()=>{born-=MS_DAY;catchUp(DAY);xray();save()}}
+
+const INAPP=/Twitter|X-Client|Line\/|Instagram|FBAN|FBAV/i.test(navigator.userAgent||'')||/[?&]inapp=1/.test(location.search);
+if(INAPP){
+  $('bExp').classList.remove('hidden');
+  try{if(sessionStorage.getItem('lt_inapp_dim')!=='1')$('inappNote').classList.remove('hidden')}
+  catch(e){$('inappNote').classList.remove('hidden')}
+}
+$('bInappClose').onclick=()=>{
+  $('inappNote').classList.add('hidden');
+  try{sessionStorage.setItem('lt_inapp_dim','1')}catch(e){}
+};
+
+function bindBtn(el,fn){
+  el.onclick=fn;
+  el.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();fn()}};
+}
+const toggleX=()=>{if(draining)return;const h=$('xray').classList.toggle('hidden');$('bX').textContent=h?'川底を見る':'川底を隠す';if(!h){xray();renderEchoes()}};
+bindBtn($('bX'),toggleX);
+bindBtn($('bSnd'),()=>Sound.setEnabled(!Sound.isEnabled()));
+bindBtn($('bLit'),()=>{
+  litMode=LIT_ORDER[(LIT_ORDER.indexOf(litMode)+1)%LIT_ORDER.length];
+  try{localStorage.setItem(LIT_KEY,litMode)}catch(e){}
+  updateLitUI();
+});
+
+document.querySelectorAll('.pill[data-drop]').forEach(btn=>{
+  btn.onclick=()=>{
+    dropKind=btn.dataset.drop||'topic';
+    document.querySelectorAll('.pill[data-drop]').forEach(b=>b.classList.toggle('active',b===btn));
+  };
+});
+
+let persisted=false;
+function reqPersist(){if(persisted)return;persisted=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
+
+function spawnDroplet(x,y,kind){
+  if(drops.length>=2)drops.shift();
+  const dr={x,y,age:0,maxAge:22,seed:rnd(0,6.28),topic:pick(TOP),kind:kind||'topic'};
+  drops.push(dr);
+  E.forEach(e=>{const dx=e.x-x,dy=e.y-y,d=Math.hypot(dx,dy)||1;
+    if(d<90){e.vx+=dx/d*18;e.vy+=dy/d*18;if(dr.kind==='topic')e.w=dr.topic}});
+  const col=dr.kind==='warm'?'#e5a27a':dr.kind==='clear'?'#7bc6e8':null;
+  spawnBubbles(x,y,3,col);
+  Sound.playDrop((x/W)*2-1,y/H,dr.kind);
+  updateTankStatus();
+}
+
+cv.addEventListener('pointerdown',ev=>{
+  if(draining)return;
+  reqPersist();Sound.unlock();
+  const rect=cv.getBoundingClientRect(),sx=W/(rect.width||W),sy=H/(rect.height||H);
+  const x=clamp((ev.clientX-rect.left)*sx,24,W-24),y=clamp((ev.clientY-rect.top)*sy,24,H-24);
+  spawnDroplet(x,y,dropKind);
+  clearTimeout(holdTid);holdTriggered=false;
+  holdTid=setTimeout(()=>{
+    if(draining)return;
+    holdTriggered=true;
+    spawnDroplet(x,y,'warm');
+  },460);
+});
+const endHold=()=>{clearTimeout(holdTid);holdTriggered=false};
+cv.addEventListener('pointerup',endHold);
+cv.addEventListener('pointercancel',endHold);
+cv.addEventListener('pointermove',ev=>{
+  const rect=cv.getBoundingClientRect(),sx=W/(rect.width||W),sy=H/(rect.height||H);
+  hoverX=(ev.clientX-rect.left)*sx;hoverY=(ev.clientY-rect.top)*sy;
+  let bi=-1,bd=38;
+  E.forEach((e,i)=>{const d=Math.hypot(e.x-hoverX,e.y-hoverY);if(d<bd){bd=d;bi=i}});
+  hoverChar=bi;
+});
+cv.addEventListener('pointerleave',()=>{hoverX=-1;hoverY=-1;hoverChar=-1;endHold()});
+document.addEventListener('keydown',()=>Sound.unlock(),{once:true});
+
+resize();E.forEach((e,i)=>{const a=i/N*Math.PI*2;e.x=W/2+Math.cos(a)*W*.3;e.y=H/2+Math.sin(a)*H*.32});
+Sound.updateBtn();updateLitUI();load();reqPersist();renderEchoes();updateTankStatus();
+addEventListener('resize',resize);
+const mq=matchMedia?.('(prefers-color-scheme: light)');mq?.addEventListener?mq.addEventListener('change',()=>setTimeout(resize,50)):mq?.addListener?.(()=>setTimeout(resize,50));
+addEventListener('pagehide',save);
+addEventListener('beforeunload',save);
+document.addEventListener('visibilitychange',()=>{
+  const vis=document.visibilityState==='visible';
+  Sound.onVisibility(vis);
+  if(!vis)save();else updateLitUI();
+});
+let last=performance.now(),sv=last,xr=last;
+function frame(now){
+  const raw=(now-last)/1000;last=now;
+  if(raw>10&&!draining)catchUp(raw);
+  step(Math.min(.05,raw));draw();
+  if(now-xr>250){xr=now;updateTankStatus();if(!$('xray').classList.contains('hidden'))xray()}
+  if(now-sv>2000){sv=now;save()}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

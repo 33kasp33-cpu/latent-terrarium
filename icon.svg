@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#223047" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#101114" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="ray" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#a8c7ee" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#a8c7ee" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#101114"/>
+  <rect x="10" y="10" width="108" height="108" rx="20" fill="#181a20" stroke="#282c37" stroke-width="2"/>
+  <path d="M12 34 Q38 29 64 34 T116 34 L116 98 Q116 116 98 116 L30 116 Q12 116 12 98 Z" fill="url(#water)"/>
+  <polygon points="34,33 56,33 74,112 40,112" fill="url(#ray)"/>
+  <polygon points="74,33 92,33 108,112 80,112" fill="url(#ray)"/>
+  <path d="M14 34 Q38 29 64 34 T114 34" fill="none" stroke="#9ec0e8" stroke-width="1.6" stroke-opacity="0.55"/>
+  <!-- Connecting relationship threads -->
+  <g stroke-width="1.4" stroke-opacity="0.48" fill="none">
+    <path d="M36 62 Q52 49 68 54" stroke="#6b9ac4"/>
+    <path d="M68 54 Q84 62 92 78" stroke="#7fb27a"/>
+    <path d="M36 62 Q50 80 56 88" stroke="#d48c70"/>
+    <path d="M56 88 Q75 88 92 78" stroke="#c9b45a"/>
+    <path d="M68 54 Q62 72 56 88" stroke="#a98ad0"/>
+  </g>
+  <!-- Five glowing character orbs -->
+  <g filter="url(#glow)">
+    <circle cx="36" cy="62" r="5.5" fill="#6b9ac4"/>
+    <circle cx="68" cy="54" r="5" fill="#7fb27a"/>
+    <circle cx="92" cy="78" r="5.5" fill="#d48c70"/>
+    <circle cx="56" cy="88" r="5" fill="#a98ad0"/>
+    <circle cx="80" cy="58" r="4.2" fill="#c9b45a"/>
+  </g>
+</svg>
